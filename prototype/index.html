@@ -1,0 +1,4461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>TeeLab AI — Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   DESIGN TOKENS — 2026 Premium Sporty-Luxe
+   ============================================================ */
+:root {
+  /* Greens — warm, deep, clubhouse sophistication */
+  --green-900: #0C2E1F;
+  --green-800: #133D2B;
+  --green-700: #1B5E3A;
+  --green-600: #24804E;
+  --green-500: #2EA363;
+  --green-400: #5ABD82;
+  --green-300: #8AD4A6;
+  --green-200: #BDE8CA;
+  --green-100: #E0F4E7;
+  --green-50:  #F0FAF3;
+
+  /* Neutrals — warm-tinted, never cold */
+  --gray-900: #141614;
+  --gray-800: #1F211F;
+  --gray-700: #2D302D;
+  --gray-600: #484C48;
+  --gray-500: #6D736D;
+  --gray-400: #99A099;
+  --gray-300: #BFC4BF;
+  --gray-200: #DDE0DD;
+  --gray-100: #EDEEED;
+  --gray-50:  #F6F7F6;
+
+  /* Accents */
+  --gold: #C9983A;
+  --red: #D43D3D;
+  --red-light: #FDF0F0;
+  --blue: #4B8AE8;
+  --blue-light: #EEF4FD;
+  --amber: #D99012;
+  --amber-light: #FEF8EB;
+
+  /* Semantic */
+  --birdie: #2EA363;
+  --eagle: #4B8AE8;
+  --bogey: #D43D3D;
+  --double-bogey: #A82222;
+  --par-color: var(--gray-500);
+
+  /* Typography */
+  --font-display: 'Bricolage Grotesque', serif;
+  --font-body: 'Plus Jakarta Sans', sans-serif;
+
+  /* Spacing — more generous */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 14px;
+  --space-lg: 16px;
+  --space-xl: 24px;
+  --space-2xl: 28px;
+  --space-3xl: 36px;
+  --space-4xl: 48px;
+
+  /* Radius — slightly softer */
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-xl: 22px;
+  --radius-full: 999px;
+
+  /* Shadows — layered, organic */
+  --shadow-sm: 0 1px 2px rgba(12,46,31,0.04), 0 1px 4px rgba(12,46,31,0.03);
+  --shadow-md: 0 2px 8px rgba(12,46,31,0.05), 0 6px 20px rgba(12,46,31,0.04);
+  --shadow-lg: 0 4px 12px rgba(12,46,31,0.06), 0 12px 40px rgba(12,46,31,0.06);
+  --shadow-card: 0 1px 3px rgba(12,46,31,0.04), 0 0 0 1px rgba(12,46,31,0.03);
+
+  /* Layout */
+  --header-height: 58px;
+
+  /* Surface */
+  --surface: #FAFBFA;
+  --surface-card: rgba(255,255,255,0.85);
+}
+
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--gray-900);
+  background: var(--gray-100);
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+/* Phone frame */
+#app {
+  max-width: 430px;
+  margin: 0 auto;
+  min-height: 100dvh;
+  background: var(--surface);
+  position: relative;
+  box-shadow: 0 0 80px rgba(0,0,0,0.06);
+}
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+.header {
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-lg);
+  background: var(--surface);
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.header-back {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--green-700);
+  font-size: 20px;
+  transition: background 0.2s;
+}
+.header-back:hover { background: var(--green-50); }
+.header-back.invisible { visibility: hidden; }
+
+.header-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 17px;
+  letter-spacing: -0.3px;
+}
+
+.header-action {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--gray-600);
+  font-size: 18px;
+  transition: background 0.2s;
+  position: relative;
+}
+.header-action:hover { background: var(--gray-100); }
+.header-action .badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  background: var(--red);
+  border-radius: 50%;
+  border: 2px solid #fff;
+}
+
+/* Group Switcher */
+.group-switcher {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--radius-full);
+  transition: background 0.15s;
+  position: relative;
+}
+
+.group-switcher:hover { background: var(--gray-100); }
+
+.group-switcher .switcher-arrow {
+  font-size: 10px;
+  color: var(--gray-400);
+  transition: transform 0.25s;
+}
+
+.group-switcher.open .switcher-arrow {
+  transform: rotate(180deg);
+}
+
+/* Dropdown */
+.group-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%) scale(0.95);
+  width: 280px;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 12px 48px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.04);
+  backdrop-filter: blur(12px);
+  z-index: 150;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+  overflow: hidden;
+}
+
+.group-dropdown.show {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) scale(1);
+}
+
+.group-dropdown-header {
+  padding: var(--space-md) var(--space-lg);
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--gray-400);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.group-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  cursor: pointer;
+  transition: background 0.15s;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  font-family: var(--font-body);
+}
+
+.group-dropdown-item:hover { background: var(--gray-50); }
+.group-dropdown-item.active { background: var(--green-50); }
+
+.group-dropdown-item .group-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.group-dropdown-item .group-detail {
+  flex: 1;
+  min-width: 0;
+}
+
+.group-dropdown-item .group-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gray-800);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.group-dropdown-item .group-meta {
+  font-size: 11px;
+  color: var(--gray-400);
+  font-weight: 500;
+}
+
+.group-dropdown-item .group-check {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--green-600);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  flex-shrink: 0;
+  opacity: 0;
+}
+
+.group-dropdown-item.active .group-check { opacity: 1; }
+
+.group-dropdown-footer {
+  padding: var(--space-md) var(--space-lg);
+  border-top: 1px solid var(--gray-100);
+}
+
+.group-dropdown-footer button {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  width: 100%;
+  padding: var(--space-sm) 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--green-600);
+}
+
+.group-dropdown-footer button:hover { color: var(--green-700); }
+
+/* Dropdown overlay */
+.dropdown-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 140;
+}
+
+.dropdown-overlay.show { display: block; }
+
+/* ============================================================
+   DRAWER
+   ============================================================ */
+.menu-btn {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--gray-600);
+  font-size: 20px;
+  transition: background 0.2s;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.menu-btn:hover { background: var(--gray-100); }
+
+.menu-btn .badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 8px;
+  height: 8px;
+  background: var(--red);
+  border-radius: 50%;
+  border: 2px solid #fff;
+}
+
+.drawer-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 300;
+  transition: opacity 0.3s;
+}
+
+.drawer-overlay.show { display: block; }
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 300px;
+  max-width: 80vw;
+  background: var(--surface);
+  z-index: 301;
+  transform: translateX(100%);
+  transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+  display: flex;
+  flex-direction: column;
+  box-shadow: -12px 0 50px rgba(0,0,0,0.08);
+}
+
+.drawer.open { transform: translateX(0); }
+
+.drawer-header {
+  padding: var(--space-2xl) var(--space-xl) var(--space-lg);
+  border-bottom: 1px solid var(--gray-100);
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.drawer-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--green-700);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 16px;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.drawer-user-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.drawer-user-name {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--gray-800);
+}
+
+.drawer-user-plan {
+  font-size: 12px;
+  color: var(--green-600);
+  font-weight: 600;
+}
+
+.drawer-section {
+  padding: var(--space-md) 0;
+}
+
+.drawer-section-title {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--gray-400);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: var(--space-sm) var(--space-xl);
+}
+
+.drawer-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-xl);
+  cursor: pointer;
+  transition: background 0.15s;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--gray-700);
+}
+
+.drawer-item:hover { background: var(--gray-50); }
+
+.drawer-item .drawer-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  background: var(--gray-100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.drawer-item .drawer-label { flex: 1; }
+
+.drawer-item .drawer-badge {
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--red-light);
+  color: var(--red);
+}
+
+.drawer-divider {
+  height: 1px;
+  background: var(--gray-100);
+  margin: var(--space-sm) 0;
+}
+
+.drawer-footer {
+  margin-top: auto;
+  padding: var(--space-lg) var(--space-xl);
+  border-top: 1px solid var(--gray-100);
+}
+
+.drawer-footer-text {
+  font-size: 12px;
+  color: var(--gray-400);
+  text-align: center;
+}
+
+/* ============================================================
+   PAGE CONTAINER
+   ============================================================ */
+.page {
+  display: none;
+  padding-bottom: var(--space-lg);
+  animation: pageIn 0.3s ease;
+}
+.page.active { display: block; }
+
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes shimmerIn {
+  from { opacity: 0; filter: blur(4px); transform: scale(0.98); }
+  to { opacity: 1; filter: blur(0); transform: scale(1); }
+}
+
+/* ============================================================
+   GROUP DETAIL PAGE
+   ============================================================ */
+
+/* Announcement Banner */
+.announcement {
+  margin: var(--space-lg);
+  padding: var(--space-xl);
+  background: linear-gradient(145deg, var(--green-900) 0%, var(--green-700) 50%, #2B7A4B 100%);
+  border-radius: var(--radius-lg);
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+
+.announcement::before {
+  content: '';
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 160px;
+  height: 160px;
+  background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+.announcement::after {
+  content: '';
+  position: absolute;
+  bottom: -50px;
+  left: 20%;
+  width: 120px;
+  height: 120px;
+  background: radial-gradient(circle, rgba(90,189,130,0.15) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+.announcement-label {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  opacity: 0.7;
+  margin-bottom: var(--space-sm);
+}
+
+.announcement-text {
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+/* Group Tabs — Primary Navigation */
+.group-tabs {
+  padding: 0 var(--space-lg);
+  margin-bottom: var(--space-md);
+  display: flex;
+  gap: var(--space-xl);
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+  border-bottom: 1.5px solid var(--gray-200);
+}
+
+.group-tabs::-webkit-scrollbar { display: none; }
+
+.group-tab {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: var(--space-md) 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: var(--font-display);
+  white-space: nowrap;
+  flex-shrink: 0;
+  position: relative;
+  transition: color 0.25s;
+}
+
+.group-tab .tab-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--gray-400);
+  letter-spacing: -0.2px;
+  transition: color 0.25s;
+}
+
+.group-tab .tab-icon { font-size: 15px; }
+
+.group-tab::after {
+  content: '';
+  position: absolute;
+  bottom: -1.5px;
+  left: 0;
+  right: 0;
+  height: 2.5px;
+  border-radius: 2px 2px 0 0;
+  background: transparent;
+  transition: background 0.25s;
+}
+
+.group-tab.active-feature .tab-label {
+  color: var(--green-800);
+  font-weight: 700;
+}
+
+.group-tab.active-feature::after {
+  background: var(--green-600);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-md);
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--gray-800);
+  letter-spacing: -0.2px;
+}
+
+.section-action {
+  font-size: 13px;
+  color: var(--green-600);
+  font-weight: 600;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.feature-section { animation: pageIn 0.25s ease; }
+.feature-section.hidden { display: none; }
+
+/* Stats Cards */
+.stats-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-sm);
+}
+
+.stat-card {
+  background: var(--surface-card);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(12,46,31,0.05);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-lg) var(--space-sm);
+  text-align: center;
+}
+
+.stat-value {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 900;
+  color: var(--green-800);
+  letter-spacing: -0.5px;
+}
+
+.stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gray-400);
+  margin-top: 2px;
+}
+
+/* Trend Chart */
+.trend-chart {
+  background: var(--surface-card);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(12,46,31,0.05);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-lg);
+  height: 180px;
+  position: relative;
+  overflow: hidden;
+}
+
+.trend-chart svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Recent Round Card */
+.recent-round {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) 0;
+  background: transparent;
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.recent-round .rr-date {
+  text-align: center;
+  min-width: 40px;
+}
+
+.recent-round .rr-day {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--gray-800);
+  line-height: 1;
+}
+
+.recent-round .rr-month {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gray-400);
+  text-transform: uppercase;
+}
+
+.recent-round .rr-info { flex: 1; }
+
+.recent-round .rr-course {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gray-800);
+}
+
+.recent-round .rr-detail {
+  font-size: 12px;
+  color: var(--gray-400);
+}
+
+.recent-round .rr-score {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.recent-round .rr-score.under { color: var(--red); }
+.recent-round .rr-score.over { color: var(--gray-700); }
+.recent-round .rr-score.even { color: var(--gray-500); }
+
+/* History Card */
+.history-card {
+  background: transparent;
+  padding: var(--space-md) 0;
+  cursor: pointer;
+  transition: background 0.15s;
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.history-card:hover { background: var(--gray-50); }
+
+.history-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--space-sm);
+}
+
+.history-date {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray-400);
+}
+
+.history-course {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--gray-800);
+  margin-bottom: var(--space-md);
+}
+
+.history-players {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-xs);
+}
+
+.history-player-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px 3px 3px;
+  background: var(--gray-50);
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gray-600);
+}
+
+.history-player-chip .hp-avatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.history-player-chip .hp-score {
+  font-family: var(--font-display);
+  font-weight: 800;
+}
+
+.history-player-chip .hp-score.under { color: var(--red); }
+.history-player-chip .hp-score.over { color: var(--gray-700); }
+
+/* Chat Section */
+.chat-section {
+  padding: 0 var(--space-lg);
+  margin-bottom: var(--space-xl);
+}
+
+.chat-messages {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.chat-msg {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: flex-start;
+}
+
+.chat-msg .cm-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.chat-msg .cm-bubble {
+  background: var(--gray-50);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-md);
+  max-width: 80%;
+}
+
+.chat-msg .cm-name {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--gray-500);
+  margin-bottom: 1px;
+}
+
+.chat-msg .cm-text {
+  font-size: 13px;
+  color: var(--gray-700);
+  line-height: 1.4;
+}
+
+.chat-msg .cm-time {
+  font-size: 10px;
+  color: var(--gray-400);
+  margin-top: 2px;
+}
+
+.chat-input-row {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.chat-input-row input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-full);
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--gray-800);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.chat-input-row input:focus { border-color: var(--green-500); }
+
+.chat-send-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(160deg, var(--green-600), var(--green-500));
+  color: #fff;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(30,128,78,0.2);
+}
+
+.chat-send-btn:hover { transform: scale(1.05); box-shadow: 0 4px 12px rgba(30,128,78,0.25); }
+
+/* Hole has-comments dot */
+.hole-comment-dot {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  background: var(--green-400);
+  border-radius: 50%;
+  margin-left: 2px;
+  vertical-align: top;
+  cursor: pointer;
+}
+
+/* Comments Page */
+.comment-thread {
+  padding: 0 var(--space-lg);
+  margin-bottom: var(--space-xl);
+}
+
+.comment-thread-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+  padding-top: var(--space-md);
+}
+
+.comment-thread-label {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--gray-800);
+}
+
+.comment-thread-par {
+  font-size: 12px;
+  color: var(--gray-400);
+  font-weight: 500;
+}
+
+.comment-thread-count {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--gray-400);
+}
+
+.comment-divider {
+  height: 1px;
+  background: var(--gray-100);
+  margin: 0 var(--space-lg);
+}
+
+.no-comments {
+  text-align: center;
+  padding: 24px 0;
+  color: var(--gray-400);
+  font-size: 13px;
+}
+
+/* Comment Input Bar */
+.comment-input-bar {
+  position: sticky;
+  bottom: 0;
+  background: rgba(246,247,246,0.9);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid var(--gray-200);
+  padding: var(--space-md) var(--space-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  z-index: 10;
+}
+
+.comment-target-btn {
+  padding: 8px 12px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-full);
+  background: #fff;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--green-700);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  position: relative;
+  transition: border-color 0.15s;
+}
+
+.comment-target-btn:hover { border-color: var(--green-400); }
+
+.comment-target-dropdown {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: var(--space-lg);
+  width: 180px;
+  background: #fff;
+  border-radius: var(--radius-md);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+  z-index: 20;
+  max-height: 240px;
+  overflow-y: auto;
+  padding: var(--space-xs) 0;
+}
+
+.comment-target-dropdown.show { display: block; }
+
+.comment-target-option {
+  display: block;
+  width: 100%;
+  padding: 8px 16px;
+  border: none;
+  background: none;
+  text-align: left;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gray-700);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.comment-target-option:hover { background: var(--gray-50); }
+.comment-target-option.active { color: var(--green-700); font-weight: 700; }
+
+.comment-target-divider {
+  height: 1px;
+  background: var(--gray-100);
+  margin: var(--space-xs) 0;
+}
+
+.comment-target-holes {
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.comment-input-bar input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-full);
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--gray-800);
+  outline: none;
+  transition: border-color 0.2s;
+  min-width: 0;
+}
+
+.comment-input-bar input:focus { border-color: var(--green-500); }
+
+/* Board message */
+.board-msg {
+  background: transparent;
+  padding: var(--space-md) 0;
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.board-msg-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.board-msg-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 11px;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.board-msg-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gray-800);
+}
+
+.board-msg-time {
+  font-size: 11px;
+  color: var(--gray-400);
+  margin-left: auto;
+}
+
+.board-msg-source {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--green-600);
+  background: var(--green-50);
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  margin-bottom: var(--space-xs);
+}
+
+.board-msg-text {
+  font-size: 14px;
+  color: var(--gray-700);
+  line-height: 1.5;
+}
+
+/* Leaderboard row */
+.lb-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) 0;
+  background: transparent;
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.lb-rank {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--gray-300);
+  width: 28px;
+  text-align: center;
+}
+
+.lb-rank.r1 { color: var(--gold); }
+.lb-rank.r2 { color: #A0A0A0; }
+.lb-rank.r3 { color: #CD7F32; }
+
+.lb-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14px;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.lb-info { flex: 1; }
+
+.lb-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--gray-800);
+}
+
+.lb-detail {
+  font-size: 12px;
+  color: var(--gray-400);
+}
+
+.lb-stats {
+  text-align: right;
+}
+
+.lb-avg {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--gray-800);
+}
+
+.lb-rounds {
+  font-size: 11px;
+  color: var(--gray-400);
+}
+
+/* View Toggle */
+.view-controls {
+  padding: 0 var(--space-lg);
+  margin-bottom: var(--space-lg);
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.view-toggle {
+  display: flex;
+  background: var(--gray-100);
+  border-radius: var(--radius-full);
+  padding: 3px;
+  flex: 1;
+}
+
+.view-btn {
+  flex: 1;
+  padding: 8px 0;
+  border: none;
+  background: none;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray-500);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.view-btn.active {
+  background: #fff;
+  color: var(--green-700);
+  box-shadow: var(--shadow-sm), 0 0 0 1px rgba(12,46,31,0.04);
+}
+
+.filter-btn {
+  padding: 8px 16px;
+  border: 2px solid var(--gray-200);
+  background: #fff;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray-600);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all 0.25s;
+  white-space: nowrap;
+}
+
+.filter-btn.active {
+  border-color: var(--green-500);
+  background: var(--green-50);
+  color: var(--green-700);
+}
+
+/* Calendar View */
+.calendar-view {
+  padding: 0;
+  margin-top: var(--space-lg);
+}
+
+.calendar-grid {
+  background: transparent;
+  margin-bottom: var(--space-sm);
+}
+
+.calendar-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-lg);
+}
+
+.calendar-month {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.calendar-nav {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.calendar-nav button {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--gray-200);
+  background: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: var(--gray-600);
+}
+
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  padding: 0 var(--space-md) var(--space-sm);
+}
+
+.calendar-weekday {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gray-400);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  padding: 0 var(--space-md) var(--space-md);
+  gap: 2px;
+}
+
+.calendar-day {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--gray-700);
+  cursor: pointer;
+  position: relative;
+  transition: background 0.15s;
+}
+
+.calendar-day:hover { background: var(--gray-50); }
+.calendar-day.other-month { color: var(--gray-300); }
+.calendar-day.today { background: var(--green-50); color: var(--green-700); font-weight: 700; }
+
+.dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+}
+
+
+/* Dot colors by tee time status */
+/* Past & Live */
+.dot.dot-completed { background: var(--gray-300); }
+.dot.dot-in-progress { background: var(--amber); }
+/* Future: green=joined, blue=not joined; hollow=has spots, solid=full */
+.dot.dot-mine { background: transparent; border: 1.5px solid var(--green-500); }
+.dot.dot-mine-full { background: var(--green-500); }
+.dot.dot-open { background: transparent; border: 1.5px solid var(--blue); }
+.dot.dot-open-full { background: var(--blue); }
+
+.calendar-legend {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-lg);
+  padding: var(--space-sm) var(--space-md) var(--space-md);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--gray-400);
+}
+
+.legend-item .dot {
+  position: static;
+  flex-shrink: 0;
+}
+
+.calendar-day .dot-group {
+  display: flex;
+  gap: 1px;
+  position: absolute;
+  bottom: 6px;
+}
+
+/* List View / Tee Time Items */
+.tee-time-list {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.date-label {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--gray-400);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: var(--space-md) var(--space-lg) var(--space-xs);
+  background: var(--gray-50);
+}
+
+.tee-time-card {
+  background: var(--surface);
+  padding: var(--space-lg);
+  cursor: pointer;
+  transition: background 0.15s;
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.tee-time-card:hover {
+  background: var(--gray-50);
+}
+
+.tee-time-card:active {
+  background: var(--gray-100);
+}
+
+.tt-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--space-md);
+}
+
+.tt-time {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--green-800);
+  letter-spacing: -0.5px;
+}
+
+.tt-status {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  letter-spacing: 0.3px;
+}
+
+.tt-status.upcoming { background: var(--green-100); color: var(--green-700); border: 1px solid rgba(30,128,78,0.1); }
+.tt-status.in-progress { background: var(--amber-light); color: var(--amber); border: 1px solid rgba(217,144,18,0.1); }
+.tt-status.completed { background: var(--gray-100); color: var(--gray-500); border: 1px solid rgba(0,0,0,0.04); }
+
+.tt-course {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--gray-800);
+  margin-bottom: 2px;
+}
+
+.tt-tee-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gray-500);
+  margin-bottom: var(--space-md);
+}
+
+.tt-tee-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1.5px solid var(--gray-300);
+}
+
+.tt-tee-dot.blue { background: #3B82F6; border-color: #3B82F6; }
+.tt-tee-dot.white { background: #fff; border-color: #ccc; }
+.tt-tee-dot.red { background: #E04545; border-color: #E04545; }
+.tt-tee-dot.gold { background: #D4A843; border-color: #D4A843; }
+
+.tt-bottom {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.tt-players {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-xs);
+  flex: 1;
+  min-width: 0;
+}
+
+.tt-player-names {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gray-700);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tt-player-count {
+  font-size: 12px;
+  color: var(--gray-400);
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+/* In-progress hole dots */
+.tt-hole-progress {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-top: var(--space-sm);
+}
+
+.tt-hole-progress .hole-gap {
+  width: 4px;
+}
+
+.tt-hole-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gray-200);
+}
+
+.tt-hole-dot.scored { background: var(--green-500); }
+.tt-hole-dot.birdie { background: var(--red); }
+
+.tt-hole-label {
+  font-size: 9px;
+  color: var(--gray-400);
+  font-weight: 600;
+  margin-left: 2px;
+}
+
+.tt-price {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--gray-700);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* ============================================================
+   TEE TIME DETAIL PAGE
+   ============================================================ */
+.detail-hero {
+  padding: var(--space-xl) var(--space-lg) var(--space-lg);
+}
+
+.detail-status-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.detail-date {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray-500);
+}
+
+.detail-time {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 900;
+  color: var(--green-800);
+  letter-spacing: -1px;
+  margin-bottom: var(--space-xs);
+}
+
+.detail-course-name {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--gray-800);
+  margin-bottom: 4px;
+}
+
+.detail-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  margin-top: var(--space-md);
+}
+
+.detail-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--gray-500);
+  font-weight: 500;
+}
+
+.detail-meta-item .icon {
+  font-size: 16px;
+}
+
+/* Info Cards */
+.detail-section {
+  padding: 0 var(--space-lg);
+  margin-bottom: var(--space-xl);
+}
+
+.detail-section-title {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--gray-800);
+  margin-bottom: var(--space-md);
+  letter-spacing: -0.2px;
+}
+
+.player-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.player-slot {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) 0;
+  background: transparent;
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.player-slot .avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14px;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.player-slot .player-info {
+  flex: 1;
+}
+
+.player-slot .player-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gray-800);
+}
+
+.player-slot .player-role {
+  font-size: 11px;
+  color: var(--gray-400);
+  font-weight: 500;
+}
+
+.player-slot.empty {
+  border-bottom: 1px dashed var(--gray-200);
+  background: transparent;
+}
+
+.player-slot.empty .avatar {
+  background: var(--gray-200);
+  color: var(--gray-400);
+  font-size: 18px;
+}
+
+.player-slot.waitlisted {
+  opacity: 0.65;
+}
+
+.waitlist-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--amber);
+  background: var(--amber-light);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+}
+
+/* Action Button */
+.action-bar {
+  padding: var(--space-lg);
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(160deg, var(--green-700), var(--green-500));
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s;
+  box-shadow: 0 4px 16px rgba(30,128,78,0.25), inset 0 1px 0 rgba(255,255,255,0.15);
+}
+
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(30,128,78,0.3), inset 0 1px 0 rgba(255,255,255,0.15); }
+.btn-primary:active { transform: scale(0.97); }
+
+.btn-danger {
+  width: 100%;
+  padding: 16px;
+  border: 2px solid var(--red);
+  border-radius: var(--radius-lg);
+  background: #fff;
+  color: var(--red);
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.btn-secondary {
+  width: 100%;
+  padding: 16px;
+  border: 2px solid var(--green-500);
+  border-radius: var(--radius-lg);
+  background: #fff;
+  color: var(--green-700);
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+/* ============================================================
+   SCORECARD PAGE
+   ============================================================ */
+.scorecard-header {
+  padding: var(--space-lg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.scorecard-info .sc-course {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--gray-800);
+}
+
+.scorecard-info .sc-meta {
+  font-size: 12px;
+  color: var(--gray-500);
+}
+
+.live-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: var(--red-light);
+  border: 1px solid rgba(212,61,61,0.1);
+  border-radius: var(--radius-full);
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--red);
+  letter-spacing: 0.5px;
+}
+
+.live-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--red);
+  border-radius: 50%;
+  animation: livePulse 1.5s infinite;
+}
+
+@keyframes livePulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+/* Scorecard Table */
+.scorecard-wrapper {
+  overflow-x: auto;
+  padding: 0 var(--space-lg);
+  margin-bottom: var(--space-lg);
+  scrollbar-width: none;
+}
+.scorecard-wrapper::-webkit-scrollbar { display: none; }
+
+.scorecard-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: max-content;
+  min-width: 100%;
+}
+
+.scorecard-table th,
+.scorecard-table td {
+  padding: 8px 6px;
+  text-align: center;
+  font-size: 13px;
+  white-space: nowrap;
+  min-width: 36px;
+}
+
+.scorecard-table thead th {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 11px;
+  color: var(--gray-400);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: sticky;
+  top: 0;
+  background: #fff;
+}
+
+.scorecard-table .hole-header {
+  background: var(--green-900);
+  color: rgba(255,255,255,0.9);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 11px;
+}
+
+.scorecard-table .hole-header:first-child {
+  border-radius: var(--radius-sm) 0 0 0;
+}
+
+.scorecard-table .hole-header:last-child {
+  border-radius: 0 var(--radius-sm) 0 0;
+}
+
+.scorecard-table .par-row td {
+  font-weight: 600;
+  color: var(--gray-500);
+  font-size: 12px;
+  background: var(--gray-50);
+}
+
+.scorecard-table .player-row td {
+  font-weight: 600;
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.scorecard-table .player-row .player-name-cell {
+  text-align: left;
+  font-weight: 700;
+  color: var(--gray-800);
+  position: sticky;
+  left: 0;
+  background: #fff;
+  z-index: 1;
+  padding-left: var(--space-md);
+  min-width: 70px;
+}
+
+.scorecard-table .par-row .label-cell {
+  text-align: left;
+  position: sticky;
+  left: 0;
+  background: var(--gray-50);
+  z-index: 1;
+  padding-left: var(--space-md);
+  min-width: 70px;
+}
+
+.score-cell {
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.15s;
+  position: relative;
+}
+
+.score-cell:hover { background: var(--gray-100); }
+
+.score-cell.birdie {
+  color: var(--red);
+  font-weight: 800;
+  position: relative;
+}
+.score-cell.birdie::after {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border: 2px solid var(--red);
+  border-radius: 50%;
+  pointer-events: none;
+}
+.score-cell.eagle {
+  color: var(--red);
+  font-weight: 800;
+  position: relative;
+}
+.score-cell.eagle::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border: 2px solid var(--red);
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 2px #fff, inset 0 0 0 4px var(--red);
+  pointer-events: none;
+}
+.score-cell.bogey { color: var(--gray-700); background: rgba(0,0,0,0.04); }
+.score-cell.double-bogey { color: var(--gray-700); background: rgba(0,0,0,0.08); font-weight: 800; }
+
+.total-cell {
+  font-family: var(--font-display);
+  font-weight: 800 !important;
+  font-size: 15px !important;
+  color: var(--green-800);
+}
+
+.scorecard-table .section-divider td {
+  padding: var(--space-sm) 0;
+  border: none;
+}
+
+.section-label {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--gray-400);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: var(--space-sm) var(--space-lg);
+}
+
+/* Score Summary Cards */
+.score-summaries {
+  padding: 0 var(--space-lg);
+  display: flex;
+  flex-direction: column;
+}
+
+.score-summary-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) 0;
+  background: transparent;
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.score-summary-card .rank {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--gray-300);
+  width: 28px;
+  text-align: center;
+}
+
+.score-summary-card .rank.first { color: var(--gold); }
+
+.score-summary-card .avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14px;
+  color: #fff;
+}
+
+.score-summary-card .summary-info {
+  flex: 1;
+}
+
+.score-summary-card .summary-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--gray-800);
+}
+
+.score-summary-card .summary-detail {
+  font-size: 12px;
+  color: var(--gray-400);
+}
+
+.score-summary-card .summary-score {
+  text-align: right;
+}
+
+.score-summary-card .total-strokes {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--gray-800);
+}
+
+.score-summary-card .total-strokes.under { color: var(--red); }
+.score-summary-card .total-strokes.over { color: var(--gray-700); }
+.score-summary-card .total-strokes.even { color: var(--gray-500); }
+
+/* ============================================================
+   CREATE TEE TIME PAGE
+   ============================================================ */
+.form-page {
+  padding: var(--space-lg);
+}
+
+.form-group {
+  margin-bottom: var(--space-xl);
+}
+
+.form-label {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gray-700);
+  letter-spacing: -0.1px;
+  margin-bottom: var(--space-sm);
+  display: block;
+}
+
+.form-input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--gray-800);
+  background: #fff;
+  transition: border-color 0.2s;
+  outline: none;
+}
+
+.form-input:focus { border-color: var(--green-500); }
+.form-input::placeholder { color: var(--gray-400); }
+
+.form-input-icon {
+  position: relative;
+}
+
+.form-input-icon .form-input {
+  padding-left: 44px;
+}
+
+.form-input-icon .icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  color: var(--gray-400);
+}
+
+/* Course Select Card */
+.course-select-card {
+  padding: var(--space-lg);
+  background: #fff;
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: border-color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.course-select-card.selected {
+  border-color: var(--green-500);
+  background: var(--green-50);
+}
+
+.course-select-card .course-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  background: var(--green-100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.course-select-card .course-info {
+  flex: 1;
+}
+
+.course-select-card .course-name {
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--gray-800);
+}
+
+.course-select-card .course-address {
+  font-size: 12px;
+  color: var(--gray-400);
+}
+
+.course-select-card .check {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid var(--gray-300);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: transparent;
+  transition: all 0.2s;
+}
+
+.course-select-card.selected .check {
+  background: var(--green-600);
+  border-color: var(--green-600);
+  color: #fff;
+}
+
+/* Tee Selector */
+.tee-options {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.tee-option {
+  flex: 1;
+  padding: 12px;
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  background: #fff;
+  cursor: pointer;
+  text-align: center;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray-600);
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.tee-option.selected {
+  border-color: var(--green-500);
+  background: var(--green-50);
+  color: var(--green-700);
+}
+
+.tee-option .tee-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--gray-300);
+}
+
+.tee-option.selected .tee-color { border-color: var(--green-500); }
+
+/* Stepper */
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.stepper-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  border: 2px solid var(--gray-200);
+  background: #fff;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--gray-600);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.stepper-btn:hover { border-color: var(--green-500); color: var(--green-600); }
+.stepper-btn:active { background: var(--green-50); }
+
+.stepper-value {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--gray-800);
+  min-width: 40px;
+  text-align: center;
+}
+
+/* Starting Hole Toggle */
+.hole-toggle {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.hole-option {
+  flex: 1;
+  padding: 14px;
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  background: #fff;
+  cursor: pointer;
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--gray-500);
+  transition: all 0.2s;
+}
+
+.hole-option.selected {
+  border-color: var(--green-500);
+  background: var(--green-50);
+  color: var(--green-700);
+}
+
+.hole-option .hole-label {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--gray-400);
+  display: block;
+  margin-top: 2px;
+}
+
+/* ============================================================
+   CREATE COURSE PAGE
+   ============================================================ */
+.hole-count-toggle {
+  display: flex;
+  background: var(--gray-100);
+  border-radius: var(--radius-full);
+  padding: 3px;
+  margin-bottom: var(--space-xl);
+}
+
+.hole-count-btn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  background: none;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--gray-500);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all 0.25s;
+}
+
+.hole-count-btn.active {
+  background: #fff;
+  color: var(--green-700);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Hole Par Grid */
+.hole-par-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-sm);
+}
+
+.hole-par-item {
+  background: #fff;
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  user-select: none;
+}
+
+.hole-par-item:active {
+  transform: scale(0.95);
+}
+
+.hole-par-item .hole-num {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--gray-400);
+  letter-spacing: 0.5px;
+}
+
+.hole-par-item .hole-par-value {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--gray-700);
+  line-height: 1.2;
+}
+
+.hole-par-item.par-3 { border-color: var(--green-400); background: var(--green-50); }
+.hole-par-item.par-3 .hole-par-value { color: var(--green-600); }
+
+.hole-par-item.par-5 { border-color: var(--blue); background: var(--blue-light); }
+.hole-par-item.par-5 .hole-par-value { color: var(--blue); }
+
+.total-par-display {
+  text-align: center;
+  padding: var(--space-xl) 0;
+}
+
+.total-par-label {
+  font-size: 12px;
+  color: var(--gray-400);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.total-par-value {
+  font-family: var(--font-display);
+  font-size: 48px;
+  font-weight: 900;
+  color: var(--green-800);
+  letter-spacing: -2px;
+}
+
+/* ============================================================
+   FAB
+   ============================================================ */
+/* Inline Create Button */
+.create-btn-inline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  width: 100%;
+  padding: 14px;
+  border: 1.5px dashed var(--green-300);
+  border-radius: var(--radius-lg);
+  background: var(--green-50);
+  color: var(--green-700);
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  margin-top: var(--space-md);
+}
+
+.create-btn-inline:hover { background: var(--green-100); border-color: var(--green-500); transform: translateY(-1px); }
+.create-btn-inline:active { transform: scale(0.97); }
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+.toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-100px);
+  padding: 12px 24px;
+  background: var(--gray-900);
+  color: #fff;
+  border-radius: var(--radius-full);
+  font-size: 14px;
+  font-weight: 600;
+  z-index: 500;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  white-space: nowrap;
+}
+
+.toast.show {
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ============================================================
+   SCORE INPUT MODAL — Per-Hole All Players
+   ============================================================ */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 300;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.modal-overlay.show {
+  display: flex;
+}
+
+.modal-sheet {
+  background: var(--surface);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  padding: var(--space-2xl);
+  width: 100%;
+  max-width: 430px;
+  animation: sheetUp 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+@keyframes sheetUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-2xl);
+}
+
+.modal-header-center {
+  text-align: center;
+}
+
+.modal-title {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.modal-subtitle {
+  font-size: 13px;
+  color: var(--gray-500);
+  margin-top: 2px;
+}
+
+.modal-nav-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid var(--gray-200);
+  background: #fff;
+  font-size: 18px;
+  color: var(--gray-600);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.modal-nav-btn:hover { border-color: var(--green-500); color: var(--green-600); }
+.modal-nav-btn:disabled { opacity: 0.3; cursor: default; }
+.modal-nav-btn:disabled:hover { border-color: var(--gray-200); color: var(--gray-600); }
+
+/* Player score rows */
+.player-score-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin-bottom: var(--space-2xl);
+}
+
+.player-score-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--gray-50);
+  border-radius: var(--radius-lg);
+  transition: background 0.15s;
+}
+
+.player-score-row.active-input {
+  background: var(--green-50);
+  box-shadow: inset 0 0 0 2px var(--green-200);
+}
+
+.player-score-row .ps-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 12px;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.player-score-row .ps-name {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gray-800);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.player-score-row .ps-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.ps-adj-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid var(--gray-200);
+  background: #fff;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--gray-600);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  user-select: none;
+}
+
+.ps-adj-btn:hover { border-color: var(--green-500); }
+.ps-adj-btn:active { background: var(--green-50); transform: scale(0.9); }
+
+.ps-score {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 900;
+  width: 44px;
+  text-align: center;
+  letter-spacing: -1px;
+}
+
+.ps-score.birdie { color: var(--red); }
+.ps-score.eagle { color: var(--red); }
+.ps-score.bogey { color: var(--gray-700); }
+.ps-score.double-bogey { color: var(--gray-700); }
+.ps-score.par { color: var(--gray-500); }
+
+.ps-diff {
+  font-size: 11px;
+  font-weight: 700;
+  width: 32px;
+  text-align: center;
+  padding: 2px 0;
+  border-radius: var(--radius-full);
+}
+
+.ps-diff.under { color: var(--birdie); background: rgba(34,169,91,0.1); }
+.ps-diff.over { color: var(--bogey); background: rgba(224,69,69,0.08); }
+.ps-diff.even { color: var(--gray-400); background: var(--gray-100); }
+
+.modal-actions {
+  display: flex;
+  gap: var(--space-md);
+}
+
+.modal-actions .btn-primary,
+.modal-actions .btn-secondary {
+  flex: 1;
+  padding: 14px;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (min-width: 431px) {
+  body {
+    background: #E8EAE8;
+  }
+}
+
+/* ============================================================
+   UTILITIES
+   ============================================================ */
+.hidden { display: none !important; }
+.text-center { text-align: center; }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <!-- Toast -->
+  <div id="toast" class="toast"></div>
+
+  <!-- Score Input Modal — Per Hole, All Players -->
+  <div id="scoreModal" class="modal-overlay" onclick="if(event.target===this)closeScoreModal()">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <button class="modal-nav-btn" id="modalPrev" onclick="navigateHole(-1)">‹</button>
+        <div class="modal-header-center">
+          <div class="modal-title" id="modalTitle">Hole 1</div>
+          <div class="modal-subtitle" id="modalSubtitle">Par 4</div>
+        </div>
+        <button class="modal-nav-btn" id="modalNext" onclick="navigateHole(1)">›</button>
+      </div>
+      <div class="player-score-rows" id="playerScoreRows"></div>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closeScoreModal()">Cancel</button>
+        <button class="btn-primary" onclick="saveHoleScores()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== GROUP DETAIL PAGE ========== -->
+  <!-- Dropdown Overlay -->
+  <div id="dropdownOverlay" class="dropdown-overlay" onclick="closeGroupDropdown()"></div>
+
+  <!-- Drawer -->
+  <div id="drawerOverlay" class="drawer-overlay" onclick="closeDrawer()"></div>
+  <div id="drawer" class="drawer">
+    <div class="drawer-header">
+      <div class="drawer-avatar">MC</div>
+      <div class="drawer-user-info">
+        <div class="drawer-user-name">Mike Chen</div>
+        <div class="drawer-user-plan">Free Plan</div>
+      </div>
+    </div>
+
+    <div class="drawer-section">
+      <div class="drawer-section-title">General</div>
+      <button class="drawer-item" onclick="closeDrawer(); showToast('3 unread notifications')">
+        <div class="drawer-icon">🔔</div>
+        <span class="drawer-label">Notifications</span>
+        <span class="drawer-badge">3</span>
+      </button>
+      <button class="drawer-item" onclick="closeDrawer(); showToast('Stats coming in V2')">
+        <div class="drawer-icon">📊</div>
+        <span class="drawer-label">Stats & Handicap</span>
+      </button>
+      <button class="drawer-item" onclick="closeDrawer(); navigate('scorecard')">
+        <div class="drawer-icon">📝</div>
+        <span class="drawer-label">Active Scorecard</span>
+        <span class="drawer-badge" style="background:var(--amber-light);color:var(--amber);">LIVE</span>
+      </button>
+    </div>
+
+    <div class="drawer-divider"></div>
+
+    <div class="drawer-section">
+      <div class="drawer-section-title">Group</div>
+      <button class="drawer-item" onclick="closeDrawer(); showToast('Join requests coming soon')">
+        <div class="drawer-icon">📋</div>
+        <span class="drawer-label">Join Requests</span>
+        <span class="drawer-badge">2</span>
+      </button>
+      <button class="drawer-item" onclick="closeDrawer(); showToast('Share: Group #28451')">
+        <div class="drawer-icon">🔗</div>
+        <span class="drawer-label">Share Group</span>
+      </button>
+      <button class="drawer-item" onclick="closeDrawer(); showToast('Group settings coming soon')">
+        <div class="drawer-icon">⚙️</div>
+        <span class="drawer-label">Group Settings</span>
+      </button>
+    </div>
+
+    <div class="drawer-divider"></div>
+
+    <div class="drawer-section">
+      <div class="drawer-section-title">Account</div>
+      <button class="drawer-item" onclick="closeDrawer(); showToast('Profile coming soon')">
+        <div class="drawer-icon">👤</div>
+        <span class="drawer-label">Profile</span>
+      </button>
+      <button class="drawer-item" onclick="closeDrawer(); showToast('Upgrade coming soon')">
+        <div class="drawer-icon" style="background:var(--green-100);">⭐</div>
+        <span class="drawer-label" style="color:var(--green-700);font-weight:600;">Upgrade to Pro</span>
+      </button>
+    </div>
+
+    <div class="drawer-footer">
+      <div class="drawer-footer-text">TeeLab AI v0.1 · #28451</div>
+    </div>
+  </div>
+
+  <div id="page-group" class="page active">
+    <div class="header">
+      <div class="group-switcher" id="groupSwitcher" onclick="toggleGroupDropdown(event)">
+        <span class="header-title" id="currentGroupName">Weekend Warriors</span>
+        <span class="switcher-arrow">▼</span>
+        <div class="group-dropdown" id="groupDropdown">
+          <div class="group-dropdown-header">My Groups</div>
+          <div id="groupDropdownList"></div>
+          <div class="group-dropdown-footer">
+            <button onclick="event.stopPropagation(); closeGroupDropdown(); showToast('Create group coming soon')">
+              <span style="font-size:16px;">+</span> Create New Group
+            </button>
+          </div>
+        </div>
+      </div>
+      <button class="menu-btn" onclick="openDrawer()">
+        ☰<span class="badge"></span>
+      </button>
+    </div>
+
+    <!-- Announcement -->
+    <div class="announcement">
+      <div class="announcement-label">📌 Announcement</div>
+      <div class="announcement-text">Spring Tournament on Apr 20th at Pebble Beach! Sign up before Apr 15. Top 3 get prizes 🏆</div>
+    </div>
+
+    <!-- Group Tabs -->
+    <div class="group-tabs" id="groupTabs">
+      <button class="group-tab active-feature" onclick="switchFeature('teetimes', this)">
+        <span class="tab-icon">📅</span>
+        <span class="tab-label">Tee Times</span>
+      </button>
+      <button class="group-tab" onclick="switchFeature('stats', this)">
+        <span class="tab-icon">📊</span>
+        <span class="tab-label">Stats</span>
+      </button>
+      <button class="group-tab" onclick="switchFeature('leaderboard', this)">
+        <span class="tab-icon">🏆</span>
+        <span class="tab-label">Leaderboard</span>
+      </button>
+      <button class="group-tab" onclick="switchFeature('members', this)">
+        <span class="tab-icon">👥</span>
+        <span class="tab-label">Members</span>
+      </button>
+      <button class="group-tab" onclick="switchFeature('board', this)">
+        <span class="tab-icon">💬</span>
+        <span class="tab-label">Board</span>
+      </button>
+      <button class="group-tab" onclick="switchFeature('history', this)">
+        <span class="tab-icon">📜</span>
+        <span class="tab-label">History</span>
+      </button>
+    </div>
+
+    <!-- === Tee Times Section === -->
+    <div id="section-teetimes" class="feature-section">
+      <!-- View Controls -->
+      <div class="view-controls">
+        <div class="view-toggle">
+          <button class="view-btn active" onclick="switchView('calendar', this)">Calendar</button>
+          <button class="view-btn" onclick="switchView('list', this)">List</button>
+          <button class="view-btn" onclick="switchView('mine', this)">Mine</button>
+        </div>
+      </div>
+
+      <!-- Create Tee Time -->
+      <div style="padding: 0 var(--space-lg);">
+        <button class="create-btn-inline" onclick="navigate('create-tee-time')">+ New Tee Time</button>
+      </div>
+
+    <!-- Calendar View -->
+    <div id="calendarView" class="calendar-view">
+      <div class="calendar-grid">
+        <div class="calendar-header-row">
+          <div class="calendar-month">April 2026</div>
+          <div class="calendar-nav">
+            <button>‹</button>
+            <button>›</button>
+          </div>
+        </div>
+        <div class="calendar-weekdays">
+          <div class="calendar-weekday">Sun</div>
+          <div class="calendar-weekday">Mon</div>
+          <div class="calendar-weekday">Tue</div>
+          <div class="calendar-weekday">Wed</div>
+          <div class="calendar-weekday">Thu</div>
+          <div class="calendar-weekday">Fri</div>
+          <div class="calendar-weekday">Sat</div>
+        </div>
+        <div class="calendar-days" id="calendarDays"></div>
+        <div class="calendar-legend">
+          <span class="legend-item"><span class="dot dot-mine"></span>Joined</span>
+          <span class="legend-item"><span class="dot dot-mine-full"></span>Joined · Full</span>
+          <span class="legend-item"><span class="dot dot-open"></span>Open</span>
+          <span class="legend-item"><span class="dot dot-open-full"></span>Full</span>
+          <span class="legend-item"><span class="dot dot-in-progress"></span>Live</span>
+          <span class="legend-item"><span class="dot dot-completed"></span>Done</span>
+        </div>
+      </div>
+
+      <!-- Tee times for selected day -->
+    </div>
+    <div id="dayTeeTimes" class="tee-time-list"></div>
+
+    <!-- List View -->
+    <div id="listView" class="tee-time-list hidden"></div>
+
+    <!-- My Tee Times View -->
+    <div id="mineView" class="hidden"></div>
+    </div>
+
+    <!-- === Stats Section === -->
+    <div id="section-stats" class="feature-section hidden">
+      <div style="padding: 0 var(--space-lg);">
+        <div class="section-header" style="margin-top: var(--space-md);">
+          <div class="section-title">My Stats in This Group</div>
+        </div>
+
+        <!-- Stat Cards -->
+        <div class="stats-cards">
+          <div class="stat-card">
+            <div class="stat-value">+2.4</div>
+            <div class="stat-label">Avg Score</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">12.8</div>
+            <div class="stat-label">Handicap</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">10</div>
+            <div class="stat-label">Rounds</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">71</div>
+            <div class="stat-label">Best</div>
+          </div>
+        </div>
+
+        <!-- Score Trend -->
+        <div class="section-header" style="margin-top: var(--space-xl);">
+          <div class="section-title">Score Trend</div>
+        </div>
+        <div class="trend-chart" id="trendChart"></div>
+
+        <!-- Recent Rounds -->
+        <div class="section-header" style="margin-top: var(--space-xl);">
+          <div class="section-title">Recent Rounds</div>
+        </div>
+        <div id="recentRounds" style="display:flex; flex-direction:column; gap: var(--space-sm);"></div>
+      </div>
+    </div>
+
+    <!-- === Members Section === -->
+    <div id="section-members" class="feature-section hidden">
+      <div style="padding: 0 var(--space-lg);">
+        <div class="section-header" style="margin-top: var(--space-md);">
+          <div class="section-title">8 Members</div>
+          <button class="section-action">Invite</button>
+        </div>
+
+        <div class="player-list" id="membersList"></div>
+      </div>
+    </div>
+
+    <!-- === Leaderboard Section === -->
+    <div id="section-leaderboard" class="feature-section hidden">
+      <div style="padding: 0 var(--space-lg);">
+        <div class="section-header" style="margin-top: var(--space-md);">
+          <div class="section-title">Season Leaderboard</div>
+          <span style="font-size: 12px; color: var(--gray-400);">Last 10 rounds</span>
+        </div>
+
+        <div id="leaderboardList" style="display:flex; flex-direction:column; gap: var(--space-sm);"></div>
+      </div>
+    </div>
+
+    <!-- === Board Section === -->
+    <div id="section-board" class="feature-section hidden">
+      <div style="padding: 0 var(--space-lg);">
+        <div class="section-header" style="margin-top: var(--space-md);">
+          <div class="section-title">Message Board</div>
+        </div>
+
+        <div style="margin-bottom: var(--space-md);">
+          <textarea class="form-input" rows="2" placeholder="Write something to the group..." style="font-size: 14px;"></textarea>
+          <div style="text-align: right; margin-top: var(--space-sm);">
+            <button class="btn-primary" style="width: auto; padding: 8px 20px; font-size: 13px;" onclick="showToast('Message posted!')">Post</button>
+          </div>
+        </div>
+
+        <div id="boardMessages" style="display:flex; flex-direction:column; gap: var(--space-md);"></div>
+      </div>
+    </div>
+
+    <!-- === History Section === -->
+    <div id="section-history" class="feature-section hidden">
+      <div style="padding: 0 var(--space-lg);">
+        <div class="section-header" style="margin-top: var(--space-md);">
+          <div class="section-title">Tee Time History</div>
+          <span style="font-size: 12px; color: var(--gray-400);">12 rounds</span>
+        </div>
+        <div id="historyList" style="display:flex; flex-direction:column; gap: var(--space-md);"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ========== TEE TIME DETAIL PAGE ========== -->
+  <div id="page-tee-detail" class="page">
+    <div class="header">
+      <button class="header-back" onclick="navigate('group')">‹</button>
+      <div class="header-title">Tee Time</div>
+      <button class="header-action">⋯</button>
+    </div>
+
+    <div class="detail-hero">
+      <div class="detail-status-row">
+        <span class="tt-status upcoming" id="detailStatus">Upcoming</span>
+        <span class="detail-date" id="detailDate">Saturday, Apr 11</span>
+      </div>
+      <div class="detail-time" id="detailTime">7:30 AM</div>
+      <div class="detail-course-name" id="detailCourse">Torrey Pines South</div>
+      <div class="detail-meta">
+        <div class="detail-meta-item">
+          <span class="icon">⛳</span>
+          <span id="detailHoles">18 Holes</span>
+        </div>
+        <div class="detail-meta-item">
+          <span class="icon">💵</span>
+          <span id="detailPrice">$180</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">Players (3/4)</div>
+      <div class="player-list" id="detailPlayers"></div>
+    </div>
+
+    <div class="detail-section" id="waitlistSection">
+      <div class="detail-section-title">Waitlist</div>
+      <div class="player-list" id="detailWaitlist"></div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">Notes</div>
+      <div style="padding: 12px 16px; background: var(--gray-50); border-radius: var(--radius-md); font-size: 14px; color: var(--gray-600); line-height: 1.5;">
+        Cart included. Meet at the clubhouse 30 min early for warm-up. Don't forget sunscreen! ☀️
+      </div>
+    </div>
+
+    <!-- Chat -->
+    <div class="chat-section">
+      <div class="detail-section-title">Chat · 4</div>
+      <div class="chat-messages" id="teeTimeChatMessages"></div>
+      <div class="chat-input-row">
+        <input type="text" placeholder="Say something..." id="teeTimeChatInput" onkeydown="if(event.key==='Enter')sendTeeTimeChat()">
+        <button class="chat-send-btn" onclick="sendTeeTimeChat()">↑</button>
+      </div>
+    </div>
+
+    <div class="action-bar" id="detailActions">
+      <button class="btn-primary" onclick="handleSignUp()">Sign Up</button>
+    </div>
+  </div>
+
+  <!-- ========== SCORECARD PAGE ========== -->
+  <div id="page-scorecard" class="page">
+    <div class="header">
+      <button class="header-back" onclick="navigate('tee-detail')">‹</button>
+      <div class="header-title">Scorecard</div>
+      <button class="header-action">📊</button>
+    </div>
+
+    <div class="scorecard-header">
+      <div class="scorecard-info">
+        <div class="sc-course">Torrey Pines South</div>
+        <div class="sc-meta">Apr 5, 2026 · Blue Tee · Stroke Play</div>
+      </div>
+      <div class="live-badge">
+        <span class="live-dot"></span>
+        LIVE
+      </div>
+    </div>
+
+    <!-- Front 9 -->
+    <div class="section-label">Front 9</div>
+    <div class="scorecard-wrapper">
+      <table class="scorecard-table" id="front9Table"></table>
+    </div>
+
+    <!-- Back 9 -->
+    <div class="section-label">Back 9</div>
+    <div class="scorecard-wrapper">
+      <table class="scorecard-table" id="back9Table"></table>
+    </div>
+
+    <!-- Summary -->
+    <div class="section-label" style="margin-top: var(--space-md);">Leaderboard</div>
+    <div class="score-summaries" id="scoreSummaries"></div>
+
+    <!-- Comments entry -->
+    <div style="padding: var(--space-xl) var(--space-lg);">
+      <button class="btn-secondary" onclick="navigate('comments')" id="scorecardCommentsBtn">💬 Comments · 7</button>
+    </div>
+  </div>
+
+  <!-- ========== COMMENTS PAGE ========== -->
+  <div id="page-comments" class="page">
+    <div class="header">
+      <button class="header-back" onclick="navigate('scorecard')">‹</button>
+      <div class="header-title">Comments</div>
+      <button class="header-action invisible">·</button>
+    </div>
+
+    <div id="commentsContent"></div>
+
+    <!-- Sticky input at bottom -->
+    <div class="comment-input-bar">
+      <button class="comment-target-btn" id="commentTargetBtn" onclick="toggleCommentTarget()">
+        General ▼
+      </button>
+      <div class="comment-target-dropdown" id="commentTargetDropdown">
+        <button class="comment-target-option active" onclick="selectCommentTarget('round', 'General')">General</button>
+        <div class="comment-target-divider"></div>
+        <div class="comment-target-holes" id="commentTargetHoles"></div>
+      </div>
+      <input type="text" placeholder="Write a comment..." id="commentPageInput" onkeydown="if(event.key==='Enter')sendPageComment()">
+      <button class="chat-send-btn" onclick="sendPageComment()">↑</button>
+    </div>
+  </div>
+
+  <!-- ========== CREATE TEE TIME PAGE ========== -->
+  <div id="page-create-tee-time" class="page">
+    <div class="header">
+      <button class="header-back" onclick="navigate('group')">‹</button>
+      <div class="header-title">New Tee Time</div>
+      <button class="header-action invisible">·</button>
+    </div>
+
+    <div class="form-page">
+      <!-- Course -->
+      <div class="form-group">
+        <label class="form-label">Course</label>
+        <div class="course-select-card selected" onclick="this.classList.toggle('selected')">
+          <div class="course-icon">⛳</div>
+          <div class="course-info">
+            <div class="course-name">Torrey Pines South</div>
+            <div class="course-address">San Diego, CA · 18 holes · Par 72</div>
+          </div>
+          <div class="check">✓</div>
+        </div>
+        <div style="margin-top: 8px;">
+          <button class="section-action" style="font-size: 13px;" onclick="navigate('create-course')">+ Add new course</button>
+        </div>
+      </div>
+
+      <!-- Date & Time -->
+      <div class="form-group">
+        <label class="form-label">Date & Time</label>
+        <input type="datetime-local" class="form-input" value="2026-04-11T07:30">
+      </div>
+
+      <!-- Max Players -->
+      <div class="form-group">
+        <label class="form-label">Max Players</label>
+        <div class="stepper">
+          <button class="stepper-btn" onclick="adjustStepper('maxPlayers', -1)">−</button>
+          <div class="stepper-value" id="maxPlayers">4</div>
+          <button class="stepper-btn" onclick="adjustStepper('maxPlayers', 1)">+</button>
+        </div>
+      </div>
+
+      <!-- Price -->
+      <div class="form-group">
+        <label class="form-label">Price (optional)</label>
+        <div class="form-input-icon">
+          <span class="icon">$</span>
+          <input type="number" class="form-input" placeholder="0.00" value="180">
+        </div>
+      </div>
+
+      <!-- Notes -->
+      <div class="form-group">
+        <label class="form-label">Notes (optional)</label>
+        <textarea class="form-input" rows="3" placeholder="Any additional info...">Cart included. Meet at the clubhouse 30 min early for warm-up.</textarea>
+      </div>
+
+      <button class="btn-primary" onclick="showToast('Tee Time created! 🎉'); setTimeout(()=>navigate('group'), 800)">Create Tee Time</button>
+    </div>
+  </div>
+
+  <!-- ========== CREATE COURSE PAGE ========== -->
+  <div id="page-create-course" class="page">
+    <div class="header">
+      <button class="header-back" onclick="navigate('create-tee-time')">‹</button>
+      <div class="header-title">New Course</div>
+      <button class="header-action invisible">·</button>
+    </div>
+
+    <div class="form-page">
+      <!-- Name -->
+      <div class="form-group">
+        <label class="form-label">Course Name</label>
+        <input type="text" class="form-input" placeholder="e.g. Pebble Beach Golf Links" value="Riviera Country Club">
+      </div>
+
+      <!-- Address -->
+      <div class="form-group">
+        <label class="form-label">Address</label>
+        <input type="text" class="form-input" placeholder="e.g. 1700 17-Mile Drive" value="1250 Capri Dr, Pacific Palisades, CA">
+      </div>
+
+      <!-- Hole Count -->
+      <div class="form-group">
+        <label class="form-label">Holes</label>
+        <div class="hole-count-toggle">
+          <button class="hole-count-btn active" onclick="setHoleCount(18, this)">18 Holes</button>
+          <button class="hole-count-btn" onclick="setHoleCount(9, this)">9 Holes</button>
+        </div>
+      </div>
+
+      <!-- Par Grid -->
+      <div class="form-group">
+        <label class="form-label">Par for Each Hole <span style="font-weight: 400; color: var(--gray-400);">· Tap to change</span></label>
+        <div class="hole-par-grid" id="holeParGrid"></div>
+      </div>
+
+      <!-- Total Par -->
+      <div class="total-par-display">
+        <div class="total-par-label">Total Par</div>
+        <div class="total-par-value" id="totalParValue">72</div>
+      </div>
+
+      <!-- Tees -->
+      <div class="form-group">
+        <label class="form-label">Tee Labels</label>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px;" id="teeLabels">
+          <span class="tt-status upcoming" style="cursor: pointer;">🔵 Blue</span>
+          <span class="tt-status upcoming" style="cursor: pointer;">⚪ White</span>
+          <span class="tt-status upcoming" style="cursor: pointer;">🔴 Red</span>
+          <span class="tt-status in-progress" style="cursor: pointer; background: var(--amber-light); color: var(--amber);">+ Add Tee</span>
+        </div>
+      </div>
+
+      <button class="btn-primary" onclick="showToast('Course submitted for review! ⛳'); setTimeout(()=>navigate('create-tee-time'), 800)">Submit for Review</button>
+      <p style="text-align: center; font-size: 12px; color: var(--gray-400); margin-top: 12px;">Course will be available after platform admin approval</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const GROUPS = [
+  { id: 1, name: 'Weekend Warriors', code: '28451', emoji: '⚔️', color: '#0F5132', members: 8, upcoming: 3 },
+  { id: 2, name: 'Bay Area Golf Club', code: '10392', emoji: '🌉', color: '#3B82F6', members: 15, upcoming: 5 },
+  { id: 3, name: 'Office Crew', code: '77204', emoji: '🏢', color: '#8B5CF6', members: 6, upcoming: 1 },
+  { id: 4, name: 'Sunday Skins Game', code: '55018', emoji: '💰', color: '#D4A843', members: 12, upcoming: 2 },
+];
+
+let currentGroupId = 1;
+
+const MEMBERS = [
+  { name: 'Mike C.', initials: 'MC', color: '#0F5132' },
+  { name: 'Jason L.', initials: 'JL', color: '#3B82F6' },
+  { name: 'David W.', initials: 'DW', color: '#D4A843' },
+  { name: 'Tommy K.', initials: 'TK', color: '#E04545' },
+  { name: 'Ryan P.', initials: 'RP', color: '#8B5CF6' },
+  { name: 'Chris H.', initials: 'CH', color: '#06B6D4' },
+  { name: 'Alex T.', initials: 'AT', color: '#EC4899' },
+  { name: 'Sam N.', initials: 'SN', color: '#F97316' },
+];
+
+const TEE_TIMES = [
+  {
+    id: 1, date: '2026-04-05', time: '6:45 AM', course: 'Torrey Pines South',
+    status: 'completed', players: [0,1,2,3],
+    waitlist: [], price: '$180', maxPlayers: 4
+  },
+  {
+    id: 2, date: '2026-04-11', time: '7:30 AM', course: 'Torrey Pines South',
+    status: 'upcoming', players: [0,1,2],
+    waitlist: [4], price: '$180', maxPlayers: 4
+  },
+  {
+    id: 3, date: '2026-04-11', time: '1:00 PM', course: 'Riviera CC',
+    status: 'upcoming', players: [3,5,6,7],
+    waitlist: [], price: '$250', maxPlayers: 4
+  },
+  {
+    id: 4, date: '2026-04-18', time: '8:00 AM', course: 'Pebble Beach',
+    status: 'upcoming', players: [0,2],
+    waitlist: [], price: '$575', maxPlayers: 4
+  },
+  {
+    id: 5, date: '2026-04-20', time: '7:00 AM', course: 'Pebble Beach',
+    status: 'upcoming', players: [0,1,2,3],
+    waitlist: [4,5,6], price: '$575', maxPlayers: 4
+  },
+  {
+    id: 6, date: '2026-04-08', time: '9:00 AM', course: 'Torrey Pines North',
+    status: 'in_progress', players: [3,5,6,7],
+    waitlist: [], price: '$150', maxPlayers: 4
+  },
+  {
+    id: 7, date: '2026-04-13', time: '2:00 PM', course: 'Riviera CC',
+    status: 'upcoming', players: [1,3,5,7],
+    waitlist: [], price: '$250', maxPlayers: 4
+  },
+];
+
+// Scorecard data: par for Torrey Pines South
+const COURSE_PAR = [4,4,3,4,5,4,4,3,5, 4,4,3,4,5,4,4,3,5]; // par 72
+const PLAYER_SCORES = {
+  0: [4,5,3,4,4,4,5,3,5, 4,4,2,5,5,4,3,3,6], // Mike: 73
+  1: [4,4,3,5,5,3,4,4,5, 5,4,3,4,6,4,4,3,5], // Jason: 75
+  2: [5,4,4,4,5,4,4,3,4, 4,5,3,4,5,5,4,2,5], // David: 74
+  3: [4,5,3,5,6,4,4,2,5, 5,4,3,5,5,4,5,3,5], // Tommy: 77
+};
+
+// My index (current user)
+const MY_INDEX = 0;
+
+// ============================================================
+// STATE
+// ============================================================
+let currentView = 'calendar';
+let myFilterActive = false;
+let courseHoleCount = 18;
+let holePars = Array(18).fill(4);
+// pre-set some pars for realism
+holePars[2] = 3; holePars[4] = 5; holePars[7] = 3; holePars[8] = 5;
+holePars[11] = 3; holePars[13] = 5; holePars[16] = 3; holePars[17] = 5;
+
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function navigate(page, data) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+
+  switch (page) {
+    case 'group':
+      document.getElementById('page-group').classList.add('active');
+      break;
+    case 'tee-detail':
+      document.getElementById('page-tee-detail').classList.add('active');
+      if (data) renderTeeDetail(data);
+      break;
+    case 'scorecard':
+      document.getElementById('page-scorecard').classList.add('active');
+      break;
+    case 'create-tee-time':
+      document.getElementById('page-create-tee-time').classList.add('active');
+      break;
+    case 'create-course':
+      document.getElementById('page-create-course').classList.add('active');
+      break;
+    case 'comments':
+      document.getElementById('page-comments').classList.add('active');
+      renderCommentsPage(data);
+      break;
+  }
+
+  window.scrollTo(0, 0);
+}
+
+// ============================================================
+// FEATURE SWITCHING
+// ============================================================
+let currentFeature = 'teetimes';
+
+function switchFeature(feature, btn) {
+  currentFeature = feature;
+
+  // Update active tab
+  document.querySelectorAll('#groupTabs .group-tab').forEach(c => c.classList.remove('active-feature'));
+  btn.classList.add('active-feature');
+
+  // Toggle sections
+  document.querySelectorAll('.feature-section').forEach(s => s.classList.add('hidden'));
+  document.getElementById(`section-${feature}`).classList.remove('hidden');
+
+  // Lazy render
+  if (feature === 'stats') renderStats();
+  if (feature === 'members') renderMembersList();
+  if (feature === 'leaderboard') renderLeaderboard();
+  if (feature === 'board') renderBoard();
+  if (feature === 'history') renderHistory();
+}
+
+// ============================================================
+// STATS
+// ============================================================
+function renderStats() {
+  renderTrendChart();
+  renderRecentRounds();
+}
+
+function renderTrendChart() {
+  const chart = document.getElementById('trendChart');
+  const scores = [+3, +1, +5, +2, +4, +1, +3, 0, +2, +1];
+  const maxVal = 6;
+  const minVal = -1;
+  const range = maxVal - minVal;
+  const w = 100;
+  const h = 100;
+  const padX = 5;
+  const padY = 10;
+  const usableW = w - padX * 2;
+  const usableH = h - padY * 2;
+
+  const points = scores.map((s, i) => {
+    const x = padX + (i / (scores.length - 1)) * usableW;
+    const y = padY + ((maxVal - s) / range) * usableH;
+    return { x, y, s };
+  });
+
+  // Par line
+  const parY = padY + ((maxVal - 0) / range) * usableH;
+
+  const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+
+  // Gradient area
+  const areaD = pathD + ` L ${points[points.length - 1].x} ${padY + usableH} L ${points[0].x} ${padY + usableH} Z`;
+
+  chart.innerHTML = `
+    <svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="var(--green-400)" stop-opacity="0.25"/>
+          <stop offset="100%" stop-color="var(--green-400)" stop-opacity="0.02"/>
+        </linearGradient>
+      </defs>
+      <!-- Par line -->
+      <line x1="${padX}" y1="${parY}" x2="${w - padX}" y2="${parY}" stroke="var(--gray-200)" stroke-width="0.5" stroke-dasharray="2,2"/>
+      <text x="${w - padX}" y="${parY - 2}" fill="var(--gray-400)" font-size="3.5" text-anchor="end" font-family="var(--font-display)">PAR</text>
+      <!-- Area -->
+      <path d="${areaD}" fill="url(#areaGrad)"/>
+      <!-- Line -->
+      <path d="${pathD}" fill="none" stroke="var(--green-600)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- Dots -->
+      ${points.map((p, i) => `
+        <circle cx="${p.x}" cy="${p.y}" r="1.8" fill="#fff" stroke="var(--green-600)" stroke-width="1"/>
+        <text x="${p.x}" y="${p.y - 4}" fill="var(--gray-600)" font-size="3.2" text-anchor="middle" font-family="var(--font-display)" font-weight="700">${p.s === 0 ? '0' : (p.s > 0 ? '+' + p.s : p.s)}</text>
+      `).join('')}
+    </svg>
+  `;
+}
+
+function renderRecentRounds() {
+  const container = document.getElementById('recentRounds');
+  const rounds = [
+    { day: '5', month: 'Apr', course: 'Torrey Pines South', detail: '18 holes · Stroke Play', score: '+1' },
+    { day: '29', month: 'Mar', course: 'Riviera CC', detail: '18 holes · Stroke Play', score: '+3' },
+    { day: '22', month: 'Mar', course: 'Pebble Beach', detail: '18 holes · Stroke Play', score: '0' },
+    { day: '15', month: 'Mar', course: 'Torrey Pines South', detail: '18 holes · Stroke Play', score: '+2' },
+    { day: '8', month: 'Mar', course: 'Torrey Pines North', detail: '18 holes · Stroke Play', score: '+5' },
+  ];
+
+  container.innerHTML = rounds.map(r => {
+    const cls = r.score === '0' ? 'even' : (r.score.startsWith('+') ? 'over' : 'under');
+    return `
+      <div class="recent-round">
+        <div class="rr-date">
+          <div class="rr-day">${r.day}</div>
+          <div class="rr-month">${r.month}</div>
+        </div>
+        <div class="rr-info">
+          <div class="rr-course">${r.course}</div>
+          <div class="rr-detail">${r.detail}</div>
+        </div>
+        <div class="rr-score ${cls}">${r.score}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ============================================================
+// HISTORY
+// ============================================================
+function renderHistory() {
+  const container = document.getElementById('historyList');
+  const history = [
+    { date: 'Apr 5, 2026', course: 'Torrey Pines South', players: [
+      { pi: 0, score: '+1' }, { pi: 1, score: '+3' }, { pi: 2, score: '+2' }, { pi: 3, score: '+5' }
+    ]},
+    { date: 'Mar 29, 2026', course: 'Riviera CC', players: [
+      { pi: 0, score: '+3' }, { pi: 3, score: '+4' }, { pi: 5, score: '+2' }, { pi: 6, score: '+7' }
+    ]},
+    { date: 'Mar 22, 2026', course: 'Pebble Beach', players: [
+      { pi: 0, score: '0' }, { pi: 1, score: '+2' }, { pi: 2, score: '+1' }, { pi: 4, score: '+6' }
+    ]},
+    { date: 'Mar 15, 2026', course: 'Torrey Pines South', players: [
+      { pi: 0, score: '+2' }, { pi: 1, score: '+1' }, { pi: 2, score: '+4' }, { pi: 3, score: '+3' }
+    ]},
+    { date: 'Mar 8, 2026', course: 'Torrey Pines North', players: [
+      { pi: 0, score: '+5' }, { pi: 5, score: '+3' }, { pi: 7, score: '+8' }
+    ]},
+    { date: 'Mar 1, 2026', course: 'Riviera CC', players: [
+      { pi: 1, score: '+2' }, { pi: 2, score: '+1' }, { pi: 3, score: '+6' }, { pi: 4, score: '+4' }
+    ]},
+    { date: 'Feb 22, 2026', course: 'Pebble Beach', players: [
+      { pi: 0, score: '+1' }, { pi: 1, score: '+4' }, { pi: 5, score: '+5' }, { pi: 6, score: '+3' }
+    ]},
+  ];
+
+  container.innerHTML = history.map(h => {
+    const playerChips = h.players.map(p => {
+      const m = MEMBERS[p.pi];
+      const cls = p.score === '0' ? '' : (p.score.startsWith('+') ? 'over' : 'under');
+      return `
+        <span class="history-player-chip">
+          <span class="hp-avatar" style="background:${m.color}">${m.initials}</span>
+          ${m.name.split('.')[0]}
+          <span class="hp-score ${cls}">${p.score}</span>
+        </span>
+      `;
+    }).join('');
+
+    return `
+      <div class="history-card" onclick="navigate('scorecard')">
+        <div class="history-top">
+          <div class="history-date">${h.date}</div>
+          <span class="tt-status completed">Completed</span>
+        </div>
+        <div class="history-course">${h.course}</div>
+        <div class="history-players">${playerChips}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ============================================================
+// MEMBERS LIST
+// ============================================================
+function renderMembersList() {
+  const container = document.getElementById('membersList');
+  const roles = ['Owner', 'Admin', 'Member', 'Member', 'Member', 'Member', 'Member', 'Member'];
+  container.innerHTML = MEMBERS.map((m, i) => `
+    <div class="player-slot">
+      <div class="avatar" style="background:${m.color}">${m.initials}</div>
+      <div class="player-info">
+        <div class="player-name">${m.name}</div>
+        <div class="player-role">${roles[i]}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ============================================================
+// LEADERBOARD
+// ============================================================
+function renderLeaderboard() {
+  const container = document.getElementById('leaderboardList');
+  const stats = [
+    { pi: 0, avg: '+1.2', rounds: 10, best: 71 },
+    { pi: 2, avg: '+2.0', rounds: 8, best: 72 },
+    { pi: 1, avg: '+2.8', rounds: 9, best: 73 },
+    { pi: 5, avg: '+3.5', rounds: 7, best: 74 },
+    { pi: 3, avg: '+4.1', rounds: 10, best: 75 },
+    { pi: 4, avg: '+5.3', rounds: 6, best: 77 },
+    { pi: 6, avg: '+6.0', rounds: 5, best: 78 },
+    { pi: 7, avg: '+8.2', rounds: 4, best: 82 },
+  ];
+
+  container.innerHTML = stats.map((s, rank) => {
+    const m = MEMBERS[s.pi];
+    const rc = rank < 3 ? ` r${rank + 1}` : '';
+    return `
+      <div class="lb-card">
+        <div class="lb-rank${rc}">${rank + 1}</div>
+        <div class="lb-avatar" style="background:${m.color}">${m.initials}</div>
+        <div class="lb-info">
+          <div class="lb-name">${m.name}</div>
+          <div class="lb-detail">Best: ${s.best} · ${s.rounds} rounds</div>
+        </div>
+        <div class="lb-stats">
+          <div class="lb-avg">${s.avg}</div>
+          <div class="lb-rounds">avg</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ============================================================
+// MESSAGE BOARD
+// ============================================================
+function renderBoard() {
+  const container = document.getElementById('boardMessages');
+
+  // Group posts
+  const groupPosts = [
+    { pi: 0, text: "Who's up for 36 holes this Saturday? Thinking Torrey Pines AM then Riviera PM 🔥", time: '2h ago', sortKey: 1 },
+    { pi: 1, text: "I'm in for the morning round! Can't do afternoon though.", time: '1h ago', sortKey: 2 },
+    { pi: 3, text: 'Just got a new driver, need to test it out. Count me in for both!', time: '45m ago', sortKey: 3 },
+    { pi: 2, text: "Reminder: anyone who hasn't paid for last week's round, Venmo me 😤", time: '30m ago', sortKey: 4 },
+  ];
+
+  // Tee time chat messages
+  const teeTimePosts = TEE_TIME_CHAT.map((msg, i) => ({
+    ...msg,
+    source: { type: 'tee_time', label: 'Apr 11 · Torrey Pines South' },
+    sortKey: 5 + i,
+  }));
+
+  // Hole comments from round data
+  const holePosts = [];
+  let sortIdx = 10;
+  // Round-level comments
+  ROUND_COMMENTS.forEach(msg => {
+    holePosts.push({
+      ...msg,
+      source: { type: 'round', label: 'Apr 5 · Torrey Pines South' },
+      sortKey: sortIdx++,
+    });
+  });
+  // Hole-level comments
+  Object.entries(HOLE_COMMENTS).forEach(([holeIdx, msgs]) => {
+    msgs.forEach(msg => {
+      holePosts.push({
+        ...msg,
+        source: { type: 'hole', label: `Apr 5 · Torrey Pines South · Hole ${parseInt(holeIdx) + 1}` },
+        sortKey: sortIdx++,
+      });
+    });
+  });
+
+  // Merge all and sort by sortKey descending (newest first)
+  const allPosts = [...groupPosts, ...teeTimePosts, ...holePosts].sort((a, b) => b.sortKey - a.sortKey);
+
+  container.innerHTML = allPosts.map(msg => {
+    const m = MEMBERS[msg.pi];
+    const sourceTag = msg.source ? `<div class="board-msg-source">${msg.source.type === 'hole' ? '⛳' : '📅'} ${msg.source.label}</div>` : '';
+    return `
+      <div class="board-msg">
+        <div class="board-msg-header">
+          <div class="board-msg-avatar" style="background:${m.color}">${m.initials}</div>
+          <div class="board-msg-name">${m.name}</div>
+          <div class="board-msg-time">${msg.time}</div>
+        </div>
+        ${sourceTag}
+        <div class="board-msg-text">${msg.text}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ============================================================
+// RENDER CALENDAR
+// ============================================================
+// Get dot CSS class based on tee time status
+function getDotClass(tt) {
+  if (tt.status === 'completed') return 'dot-completed';
+  if (tt.status === 'in_progress') return 'dot-in-progress';
+  // Future: color = joined or not, solid/hollow = spots or full
+  const isMine = tt.players.includes(MY_INDEX);
+  const isFull = tt.players.length >= tt.maxPlayers;
+  if (isMine && isFull) return 'dot-mine-full';
+  if (isMine) return 'dot-mine';
+  if (isFull) return 'dot-open-full';
+  return 'dot-open';
+}
+
+function renderCalendar() {
+  const daysContainer = document.getElementById('calendarDays');
+  // April 2026: starts on Wednesday (day index 3), 30 days
+  const startDay = 3; // Wed
+  const totalDays = 30;
+
+  const teeDateMap = {};
+  TEE_TIMES.forEach(tt => {
+    const day = parseInt(tt.date.split('-')[2]);
+    if (!teeDateMap[day]) teeDateMap[day] = [];
+    teeDateMap[day].push(tt);
+  });
+
+  let html = '';
+
+  // Previous month padding
+  for (let i = 0; i < startDay; i++) {
+    const d = 29 - startDay + 1 + i;
+    html += `<div class="calendar-day other-month">${d}</div>`;
+  }
+
+  for (let d = 1; d <= totalDays; d++) {
+    const isToday = d === 8;
+    const tees = teeDateMap[d];
+    const hasTee = tees && tees.length > 0;
+
+    let dots = '';
+    if (hasTee) {
+      dots = `<span class="dot-group">${tees.slice(0, 4).map(t =>
+        `<span class="dot ${getDotClass(t)}"></span>`
+      ).join('')}</span>`;
+    }
+
+    html += `<div class="calendar-day${isToday ? ' today' : ''}" onclick="selectDay(${d})">${d}${dots}</div>`;
+  }
+
+  // Next month padding
+  const remaining = 7 - ((startDay + totalDays) % 7);
+  if (remaining < 7) {
+    for (let i = 1; i <= remaining; i++) {
+      html += `<div class="calendar-day other-month">${i}</div>`;
+    }
+  }
+
+  daysContainer.innerHTML = html;
+}
+
+function selectDay(day) {
+  const container = document.getElementById('dayTeeTimes');
+  const dayTees = TEE_TIMES.filter(tt => {
+    const d = parseInt(tt.date.split('-')[2]);
+    return d === day;
+  });
+
+  if (dayTees.length === 0) {
+    container.innerHTML = `<div style="text-align:center; padding: 32px 0; color: var(--gray-400); font-size: 14px;">No tee times on Apr ${day}</div>`;
+    return;
+  }
+
+  container.innerHTML = dayTees.map(tt => renderTeeTimeCard(tt)).join('');
+}
+
+// ============================================================
+// RENDER TEE TIME CARDS
+// ============================================================
+// Mock scores for completed tee times
+const COMPLETED_SCORES = {
+  1: { 0: '+1', 1: '+3', 2: '+2', 3: '+5' },
+};
+
+// Mock hole progress for in-progress tee times
+// Each hole: null=not scored, 'par'=scored at par or worse, 'birdie'=birdie or better
+const IN_PROGRESS_HOLES = {
+  6: [
+    'par','birdie','par','par','par','par','birdie','par','par',
+    'par','par',null,null,null,null,null,null,null
+  ],
+};
+
+function renderTeeTimeCard(tt) {
+  const statusClass = tt.status.replace('_', '-');
+
+  // Completed: use history-style layout with player score chips
+  if (tt.status === 'completed' && COMPLETED_SCORES[tt.id]) {
+    const scores = COMPLETED_SCORES[tt.id];
+    const playerChips = tt.players.map(pi => {
+      const m = MEMBERS[pi];
+      const score = scores[pi] || '0';
+      const cls = score === '0' ? '' : (score.startsWith('+') ? 'over' : 'under');
+      return `
+        <span class="history-player-chip">
+          <span class="hp-avatar" style="background:${m.color}">${m.initials}</span>
+          ${m.name.split('.')[0]}
+          <span class="hp-score ${cls}">${score}</span>
+        </span>
+      `;
+    }).join('');
+
+    return `
+      <div class="tee-time-card" onclick="navigate('scorecard')">
+        <div class="tt-top">
+          <div class="tt-time">${tt.time}</div>
+          <span class="tt-status ${statusClass}">Completed</span>
+        </div>
+        <div class="tt-course" style="margin-bottom: var(--space-sm);">${tt.course}</div>
+        <div class="history-players">${playerChips}</div>
+      </div>
+    `;
+  }
+
+  // Upcoming / In Progress: normal layout
+  const playerNames = tt.players.slice(0, 4).map(pi => MEMBERS[pi].name.split('.')[0]).join(', ');
+  const remaining = tt.players.length > 4 ? ` +${tt.players.length - 4}` : '';
+
+  // Hole progress for in_progress
+  let holeProgressHtml = '';
+  if (tt.status === 'in_progress' && IN_PROGRESS_HOLES[tt.id]) {
+    const holes = IN_PROGRESS_HOLES[tt.id];
+    const front9 = holes.slice(0, 9).map(h => {
+      const cls = h === 'birdie' ? 'birdie' : (h ? 'scored' : '');
+      return `<span class="tt-hole-dot ${cls}"></span>`;
+    }).join('');
+    const back9 = holes.slice(9, 18).map(h => {
+      const cls = h === 'birdie' ? 'birdie' : (h ? 'scored' : '');
+      return `<span class="tt-hole-dot ${cls}"></span>`;
+    }).join('');
+    const scored = holes.filter(h => h !== null).length;
+    holeProgressHtml = `
+      <div class="tt-hole-progress">
+        ${front9}
+        <span class="hole-gap"></span>
+        ${back9}
+        <span class="tt-hole-label">${scored}/18</span>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="tee-time-card" onclick="navigate('tee-detail', ${tt.id})">
+      <div class="tt-top">
+        <div class="tt-time">${tt.time}</div>
+        <span class="tt-status ${statusClass}">${tt.status === 'in_progress' ? 'In Progress' : tt.status.charAt(0).toUpperCase() + tt.status.slice(1)}</span>
+      </div>
+      <div class="tt-course" style="margin-bottom: var(--space-sm);">${tt.course}</div>
+      <div class="tt-bottom">
+        <div class="tt-players">
+          <span class="tt-player-names">${playerNames}${remaining}</span>
+          <span class="tt-player-count">${tt.players.length}/${tt.maxPlayers}</span>
+        </div>
+        <div class="tt-price">${tt.price}</div>
+      </div>
+      ${holeProgressHtml}
+    </div>
+  `;
+}
+
+function renderListView() {
+  const container = document.getElementById('listView');
+  // List view: only upcoming and in_progress (completed goes to History)
+  let filtered = TEE_TIMES.filter(tt => tt.status !== 'completed');
+  if (myFilterActive) {
+    filtered = filtered.filter(tt => tt.players.includes(MY_INDEX));
+  }
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<div style="text-align:center; padding: 40px 0; color: var(--gray-400); font-size: 14px;">No upcoming tee times</div>`;
+    return;
+  }
+
+  // Group by date
+  const grouped = {};
+  filtered.forEach(tt => {
+    if (!grouped[tt.date]) grouped[tt.date] = [];
+    grouped[tt.date].push(tt);
+  });
+
+  let html = '';
+  Object.keys(grouped).sort().forEach(date => {
+    const d = new Date(date + 'T00:00:00');
+    const label = d.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+    html += `<div class="date-label">${label}</div>`;
+    grouped[date].forEach(tt => {
+      html += renderTeeTimeCard(tt);
+    });
+  });
+
+  container.innerHTML = html;
+}
+
+// ============================================================
+// TEE TIME DETAIL
+// ============================================================
+function renderTeeDetail(teeTimeId) {
+  const tt = TEE_TIMES.find(t => t.id === teeTimeId) || TEE_TIMES[1];
+
+  document.getElementById('detailStatus').textContent =
+    tt.status === 'in_progress' ? 'In Progress' : tt.status.charAt(0).toUpperCase() + tt.status.slice(1);
+  document.getElementById('detailStatus').className = 'tt-status ' + tt.status.replace('_', '-');
+
+  const d = new Date(tt.date + 'T00:00:00');
+  document.getElementById('detailDate').textContent = d.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+  document.getElementById('detailTime').textContent = tt.time;
+  document.getElementById('detailCourse').textContent = tt.course;
+  document.getElementById('detailPrice').textContent = tt.price;
+
+  // Players
+  const playersContainer = document.getElementById('detailPlayers');
+  let phtml = '';
+
+  for (let i = 0; i < tt.maxPlayers; i++) {
+    if (i < tt.players.length) {
+      const m = MEMBERS[tt.players[i]];
+      const role = tt.players[i] === 0 ? 'Organizer' : 'Player';
+      phtml += `
+        <div class="player-slot">
+          <div class="avatar" style="background:${m.color}">${m.initials}</div>
+          <div class="player-info">
+            <div class="player-name">${m.name}</div>
+            <div class="player-role">${role}</div>
+          </div>
+        </div>`;
+    } else {
+      phtml += `
+        <div class="player-slot empty">
+          <div class="avatar">+</div>
+          <div class="player-info">
+            <div class="player-name" style="color: var(--gray-400);">Open Slot</div>
+          </div>
+        </div>`;
+    }
+  }
+  playersContainer.innerHTML = phtml;
+
+  // Waitlist
+  const waitlistContainer = document.getElementById('detailWaitlist');
+  const waitlistSection = document.getElementById('waitlistSection');
+  if (tt.waitlist.length > 0) {
+    waitlistSection.style.display = 'block';
+    waitlistContainer.innerHTML = tt.waitlist.map((pi, idx) => {
+      const m = MEMBERS[pi];
+      return `
+        <div class="player-slot waitlisted">
+          <div class="avatar" style="background:${m.color}">${m.initials}</div>
+          <div class="player-info">
+            <div class="player-name">${m.name}</div>
+            <div class="player-role">#${idx + 1} in waitlist</div>
+          </div>
+          <span class="waitlist-label">Waitlisted</span>
+        </div>`;
+    }).join('');
+  } else {
+    waitlistSection.style.display = 'none';
+  }
+
+  // Chat
+  renderTeeTimeChat();
+
+  // Action button
+  const actions = document.getElementById('detailActions');
+  const isSignedUp = tt.players.includes(MY_INDEX);
+  const isWaitlisted = tt.waitlist.includes(MY_INDEX);
+  const isFull = tt.players.length >= tt.maxPlayers;
+
+  if (tt.status === 'completed') {
+    actions.innerHTML = `<button class="btn-secondary" onclick="navigate('scorecard')">View Scorecard</button>`;
+  } else if (tt.status === 'in_progress') {
+    actions.innerHTML = `<button class="btn-primary" onclick="navigate('scorecard')">Open Scorecard</button>`;
+  } else if (isSignedUp) {
+    actions.innerHTML = `<button class="btn-danger" onclick="handleWithdraw()">Withdraw</button>`;
+  } else if (isWaitlisted) {
+    actions.innerHTML = `<button class="btn-danger" onclick="handleWithdraw()">Leave Waitlist</button>`;
+  } else {
+    actions.innerHTML = `<button class="btn-primary" onclick="handleSignUp()">${isFull ? 'Join Waitlist' : 'Sign Up'}</button>`;
+  }
+}
+
+function handleSignUp() {
+  showToast('Signed up successfully! ⛳');
+}
+
+function handleWithdraw() {
+  showToast('Withdrawn from tee time');
+}
+
+// ============================================================
+// SCORECARD
+// ============================================================
+function renderScorecard() {
+  renderScoreTable('front9Table', 0, 9);
+  renderScoreTable('back9Table', 9, 18);
+  renderSummaries();
+}
+
+function renderScoreTable(tableId, start, end) {
+  const table = document.getElementById(tableId);
+  const players = [0, 1, 2, 3];
+
+  // Header
+  let html = '<thead><tr>';
+  html += `<th class="hole-header" style="text-align:left; padding-left:12px;">Hole</th>`;
+  for (let i = start; i < end; i++) {
+    const hc = HOLE_COMMENTS[i] ? HOLE_COMMENTS[i].length : 0;
+    const dot = hc > 0 ? `<span class="hole-comment-dot" onclick="event.stopPropagation(); navigate('comments', ${i})"></span>` : '';
+    html += `<th class="hole-header" style="cursor:pointer" onclick="openHoleModal(${i})">${i + 1}${dot}</th>`;
+  }
+  html += `<th class="hole-header">Tot</th>`;
+  html += '</tr></thead><tbody>';
+
+  // Par row
+  html += '<tr class="par-row">';
+  html += `<td class="label-cell">PAR</td>`;
+  let parTotal = 0;
+  for (let i = start; i < end; i++) {
+    html += `<td>${COURSE_PAR[i]}</td>`;
+    parTotal += COURSE_PAR[i];
+  }
+  html += `<td style="font-weight:800;">${parTotal}</td>`;
+  html += '</tr>';
+
+  // Player rows
+  players.forEach(pi => {
+    const m = MEMBERS[pi];
+    html += '<tr class="player-row">';
+    html += `<td class="player-name-cell">
+      <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:${m.color}; margin-right:6px; vertical-align:middle;"></span>
+      ${m.name.split(' ')[0]}
+    </td>`;
+
+    let totalDiff = 0;
+    for (let i = start; i < end; i++) {
+      const score = PLAYER_SCORES[pi][i];
+      const par = COURSE_PAR[i];
+      const diff = score - par;
+      totalDiff += diff;
+      let cls = '';
+      if (diff <= -2) cls = 'eagle';
+      else if (diff === -1) cls = 'birdie';
+      else if (diff === 1) cls = 'bogey';
+      else if (diff >= 2) cls = 'double-bogey';
+
+      const diffStr = diff === 0 ? '0' : (diff > 0 ? `+${diff}` : `${diff}`);
+      html += `<td class="score-cell ${cls}" onclick="openScoreModal(${pi}, ${i})">${diffStr}</td>`;
+    }
+    const totalStr = totalDiff === 0 ? '0' : (totalDiff > 0 ? `+${totalDiff}` : `${totalDiff}`);
+    html += `<td class="total-cell">${totalStr}</td>`;
+    html += '</tr>';
+  });
+
+  html += '</tbody>';
+  table.innerHTML = html;
+}
+
+function renderSummaries() {
+  const container = document.getElementById('scoreSummaries');
+  const players = [0, 1, 2, 3];
+
+  const totals = players.map(pi => {
+    const total = PLAYER_SCORES[pi].reduce((a, b) => a + b, 0);
+    const par = COURSE_PAR.reduce((a, b) => a + b, 0);
+    return { pi, total, diff: total - par };
+  }).sort((a, b) => a.total - b.total);
+
+  container.innerHTML = totals.map((t, rank) => {
+    const m = MEMBERS[t.pi];
+    const diffStr = t.diff === 0 ? '0' : (t.diff > 0 ? `+${t.diff}` : `${t.diff}`);
+    const diffClass = t.diff < 0 ? 'under' : (t.diff > 0 ? 'over' : 'even');
+
+    // Count birdies
+    const birdies = PLAYER_SCORES[t.pi].filter((s, i) => s < COURSE_PAR[i]).length;
+
+    return `
+      <div class="score-summary-card">
+        <div class="rank${rank === 0 ? ' first' : ''}">${rank + 1}</div>
+        <div class="avatar" style="background:${m.color}">${m.initials}</div>
+        <div class="summary-info">
+          <div class="summary-name">${m.name}</div>
+          <div class="summary-detail">${birdies} birdies · ${t.total} strokes</div>
+        </div>
+        <div class="summary-score">
+          <div class="total-strokes ${diffClass}">${diffStr}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ============================================================
+// TEE TIME CHAT
+// ============================================================
+const TEE_TIME_CHAT = [
+  { pi: 1, text: 'Should we get carts or walk?', time: '2d ago' },
+  { pi: 0, text: 'Cart is included in the price 👍', time: '2d ago' },
+  { pi: 2, text: "Nice, I'll bring the speaker", time: '1d ago' },
+  { pi: 3, text: "Let's meet at the clubhouse at 7:00", time: '3h ago' },
+];
+
+function renderTeeTimeChat() {
+  const container = document.getElementById('teeTimeChatMessages');
+  container.innerHTML = TEE_TIME_CHAT.map(msg => {
+    const m = MEMBERS[msg.pi];
+    return `
+      <div class="chat-msg">
+        <div class="cm-avatar" style="background:${m.color}">${m.initials}</div>
+        <div class="cm-bubble">
+          <div class="cm-name">${m.name}</div>
+          <div class="cm-text">${msg.text}</div>
+          <div class="cm-time">${msg.time}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function sendTeeTimeChat() {
+  const input = document.getElementById('teeTimeChatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  TEE_TIME_CHAT.push({ pi: 0, text, time: 'now' });
+  input.value = '';
+  renderTeeTimeChat();
+}
+
+// ============================================================
+// HOLE CHAT
+// ============================================================
+const ROUND_COMMENTS = [
+  { pi: 1, text: 'Great round today guys! The weather was perfect ☀️', time: '30m ago' },
+  { pi: 0, text: 'David was on fire on the back nine', time: '25m ago' },
+];
+
+const HOLE_COMMENTS = {
+  2: [
+    { pi: 1, text: 'Almost aced it! Ball was 2 inches from the pin 😱', time: '1h ago' },
+    { pi: 0, text: 'That was insane, we all thought it went in', time: '1h ago' },
+  ],
+  4: [
+    { pi: 2, text: 'Eagle! Best shot I have ever hit on this hole 🦅', time: '45m ago' },
+    { pi: 3, text: "David you're on fire today", time: '44m ago' },
+    { pi: 0, text: 'Driver was absolutely pure', time: '43m ago' },
+  ],
+  12: [
+    { pi: 3, text: 'Lost my ball in the canyon again...', time: '20m ago' },
+    { pi: 1, text: '😂 same spot as last time', time: '19m ago' },
+  ],
+};
+
+
+// ============================================================
+// SCORE MODAL — Per Hole, All Players
+// ============================================================
+let modalHoleIdx = 0;
+let modalScores = {}; // { playerIdx: score }
+
+function openScoreModal(playerIdx, holeIdx) {
+  modalHoleIdx = holeIdx;
+  openHoleModal(holeIdx);
+}
+
+function openHoleModal(holeIdx) {
+  modalHoleIdx = holeIdx;
+  const par = COURSE_PAR[holeIdx];
+  const players = [0, 1, 2, 3];
+
+  // Copy current scores
+  modalScores = {};
+  players.forEach(pi => {
+    modalScores[pi] = PLAYER_SCORES[pi][holeIdx];
+  });
+
+  document.getElementById('modalTitle').textContent = `Hole ${holeIdx + 1}`;
+  document.getElementById('modalSubtitle').textContent = `Par ${par}`;
+
+  // Nav buttons
+  document.getElementById('modalPrev').disabled = holeIdx === 0;
+  document.getElementById('modalNext').disabled = holeIdx === 17;
+
+  renderPlayerScoreRows();
+  document.getElementById('scoreModal').classList.add('show');
+}
+
+function renderPlayerScoreRows() {
+  const container = document.getElementById('playerScoreRows');
+  const par = COURSE_PAR[modalHoleIdx];
+  const players = [0, 1, 2, 3];
+
+  container.innerHTML = players.map(pi => {
+    const m = MEMBERS[pi];
+    const score = modalScores[pi];
+    const diff = score - par;
+
+    let scoreClass = 'par';
+    if (diff <= -2) scoreClass = 'eagle';
+    else if (diff === -1) scoreClass = 'birdie';
+    else if (diff === 1) scoreClass = 'bogey';
+    else if (diff >= 2) scoreClass = 'double-bogey';
+
+    const diffStr = diff === 0 ? '0' : (diff > 0 ? `+${diff}` : `${diff}`);
+
+    return `
+      <div class="player-score-row">
+        <div class="ps-avatar" style="background:${m.color}">${m.initials}</div>
+        <div class="ps-name">${m.name}</div>
+        <div class="ps-controls">
+          <button class="ps-adj-btn" onclick="adjustPlayerScore(${pi}, -1)">−</button>
+          <div class="ps-score ${scoreClass}">${diffStr}</div>
+          <button class="ps-adj-btn" onclick="adjustPlayerScore(${pi}, 1)">+</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function adjustPlayerScore(playerIdx, delta) {
+  modalScores[playerIdx] = Math.max(1, modalScores[playerIdx] + delta);
+  renderPlayerScoreRows();
+}
+
+function navigateHole(delta) {
+  // Auto-save current hole before navigating
+  const players = [0, 1, 2, 3];
+  players.forEach(pi => {
+    PLAYER_SCORES[pi][modalHoleIdx] = modalScores[pi];
+  });
+  renderScorecard();
+
+  const newIdx = modalHoleIdx + delta;
+  if (newIdx >= 0 && newIdx <= 17) {
+    openHoleModal(newIdx);
+  }
+}
+
+function saveHoleScores() {
+  const players = [0, 1, 2, 3];
+  players.forEach(pi => {
+    PLAYER_SCORES[pi][modalHoleIdx] = modalScores[pi];
+  });
+  closeScoreModal();
+  renderScorecard();
+  showToast(`Hole ${modalHoleIdx + 1} scores saved`);
+}
+
+function closeScoreModal() {
+  document.getElementById('scoreModal').classList.remove('show');
+}
+
+// ============================================================
+// COMMENTS PAGE
+// ============================================================
+let commentTarget = 'round'; // 'round' or hole index
+
+function renderCommentsPage(scrollToHole) {
+  const container = document.getElementById('commentsContent');
+  let html = '';
+
+  // Round-level comments
+  if (ROUND_COMMENTS.length > 0) {
+    html += `<div class="comment-thread" id="comment-round">`;
+    html += `<div class="comment-thread-header">
+      <div class="comment-thread-label">General</div>
+      <div class="comment-thread-count">${ROUND_COMMENTS.length}</div>
+    </div>`;
+    html += renderCommentMessages(ROUND_COMMENTS);
+    html += `</div>`;
+    html += `<div class="comment-divider"></div>`;
+  }
+
+  // Per-hole comments — only show holes that have comments
+  let holesWithComments = [];
+  for (let i = 0; i < 18; i++) {
+    const msgs = HOLE_COMMENTS[i] || [];
+    if (msgs.length > 0) holesWithComments.push(i);
+  }
+
+  if (holesWithComments.length === 0 && ROUND_COMMENTS.length === 0) {
+    html += `<div class="no-comments" style="padding: 60px 0;">No comments yet.<br>Start the conversation!</div>`;
+  }
+
+  holesWithComments.forEach((i, idx) => {
+    const msgs = HOLE_COMMENTS[i];
+    const par = COURSE_PAR[i];
+
+    html += `<div class="comment-thread" id="comment-hole-${i}">`;
+    html += `<div class="comment-thread-header">
+      <div class="comment-thread-label">Hole ${i + 1}</div>
+      <div class="comment-thread-par">Par ${par}</div>
+      <div class="comment-thread-count">${msgs.length}</div>
+    </div>`;
+    html += renderCommentMessages(msgs);
+    html += `</div>`;
+    if (idx < holesWithComments.length - 1) html += `<div class="comment-divider"></div>`;
+  });
+
+  // Padding for sticky input bar
+  html += `<div style="height: 70px;"></div>`;
+
+  container.innerHTML = html;
+
+  // Build target dropdown holes
+  const holesDropdown = document.getElementById('commentTargetHoles');
+  holesDropdown.innerHTML = Array.from({ length: 18 }, (_, i) => {
+    const active = commentTarget === i ? ' active' : '';
+    return `<button class="comment-target-option${active}" onclick="selectCommentTarget(${i}, 'Hole ${i + 1}')">Hole ${i + 1}</button>`;
+  }).join('');
+
+  // Set target if scrolling to a specific hole
+  if (scrollToHole !== undefined && scrollToHole !== null) {
+    selectCommentTarget(scrollToHole, `Hole ${scrollToHole + 1}`);
+    setTimeout(() => {
+      const el = document.getElementById(`comment-hole-${scrollToHole}`);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  }
+
+  updateCommentCounts();
+}
+
+function renderCommentMessages(msgs) {
+  return msgs.map(msg => {
+    const m = MEMBERS[msg.pi];
+    return `
+      <div class="chat-msg">
+        <div class="cm-avatar" style="background:${m.color}">${m.initials}</div>
+        <div class="cm-bubble">
+          <div class="cm-name">${m.name}</div>
+          <div class="cm-text">${msg.text}</div>
+          <div class="cm-time">${msg.time}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function toggleCommentTarget() {
+  document.getElementById('commentTargetDropdown').classList.toggle('show');
+}
+
+function selectCommentTarget(target, label) {
+  commentTarget = target;
+  document.getElementById('commentTargetBtn').textContent = label + ' ▼';
+  document.getElementById('commentTargetDropdown').classList.remove('show');
+  document.getElementById('commentPageInput').focus();
+
+  // Update active state
+  document.querySelectorAll('.comment-target-option').forEach(opt => opt.classList.remove('active'));
+  event?.currentTarget?.classList.add('active');
+}
+
+function sendPageComment() {
+  const input = document.getElementById('commentPageInput');
+  const text = input.value.trim();
+  if (!text) return;
+
+  if (commentTarget === 'round') {
+    ROUND_COMMENTS.push({ pi: 0, text, time: 'now' });
+  } else {
+    const holeIdx = commentTarget;
+    if (!HOLE_COMMENTS[holeIdx]) HOLE_COMMENTS[holeIdx] = [];
+    HOLE_COMMENTS[holeIdx].push({ pi: 0, text, time: 'now' });
+  }
+
+  input.value = '';
+  renderCommentsPage();
+  renderScorecard();
+}
+
+function updateCommentCounts() {
+  const totalComments = ROUND_COMMENTS.length + Object.values(HOLE_COMMENTS).reduce((sum, arr) => sum + arr.length, 0);
+  const btn = document.getElementById('scorecardCommentsBtn');
+  if (btn) btn.textContent = `💬 Comments · ${totalComments}`;
+}
+
+// ============================================================
+// VIEW SWITCHING
+// ============================================================
+function switchView(view, btn) {
+  currentView = view;
+  btn.parentElement.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  document.getElementById('calendarView').classList.add('hidden');
+  document.getElementById('listView').classList.add('hidden');
+  document.getElementById('mineView').classList.add('hidden');
+  // Also hide/show dayTeeTimes which is outside calendarView
+  document.getElementById('dayTeeTimes').classList.add('hidden');
+
+  if (view === 'calendar') {
+    document.getElementById('calendarView').classList.remove('hidden');
+    document.getElementById('dayTeeTimes').classList.remove('hidden');
+  } else if (view === 'list') {
+    document.getElementById('listView').classList.remove('hidden');
+    renderListView();
+  } else if (view === 'mine') {
+    document.getElementById('mineView').classList.remove('hidden');
+    renderMineView();
+  }
+}
+
+function renderMineView() {
+  const container = document.getElementById('mineView');
+  const mine = TEE_TIMES.filter(tt => tt.players.includes(MY_INDEX)).sort((a, b) => {
+    // Sort: in_progress first, then upcoming, then completed
+    const order = { in_progress: 0, upcoming: 1, completed: 2 };
+    return (order[a.status] || 1) - (order[b.status] || 1);
+  });
+
+  if (mine.length === 0) {
+    container.innerHTML = `<div style="text-align:center; padding: 40px 0; color: var(--gray-400); font-size: 14px;">You haven't joined any tee times yet</div>`;
+    return;
+  }
+
+  // Split into future/today and past, closest to today first
+  const today = '2026-04-08';
+  const upcoming = mine.filter(tt => tt.date >= today).sort((a, b) => a.date.localeCompare(b.date));
+  const past = mine.filter(tt => tt.date < today).sort((a, b) => b.date.localeCompare(a.date));
+  const sorted = [...upcoming, ...past];
+
+  // Group by date
+  const grouped = {};
+  sorted.forEach(tt => {
+    if (!grouped[tt.date]) grouped[tt.date] = [];
+    grouped[tt.date].push(tt);
+  });
+
+  let html = '<div class="tee-time-list">';
+  // Preserve the sorted order (not re-sorting keys)
+  const seen = new Set();
+  sorted.forEach(tt => {
+    if (seen.has(tt.date)) return;
+    seen.add(tt.date);
+    const d = new Date(tt.date + 'T00:00:00');
+    const label = d.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+    html += `<div class="date-label">${label}</div>`;
+    grouped[tt.date].forEach(t => { html += renderTeeTimeCard(t); });
+  });
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+// ============================================================
+// FORM HELPERS
+// ============================================================
+function selectTee(btn) {
+  btn.parentElement.querySelectorAll('.tee-option').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function selectHole(btn) {
+  btn.parentElement.querySelectorAll('.hole-option').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function adjustStepper(id, delta) {
+  const el = document.getElementById(id);
+  let val = parseInt(el.textContent) + delta;
+  val = Math.max(1, Math.min(8, val));
+  el.textContent = val;
+}
+
+// ============================================================
+// COURSE CREATION - HOLE PAR GRID
+// ============================================================
+function renderHoleParGrid() {
+  const grid = document.getElementById('holeParGrid');
+  const count = courseHoleCount;
+
+  grid.innerHTML = holePars.slice(0, count).map((par, i) => {
+    const cls = par === 3 ? 'par-3' : (par === 5 ? 'par-5' : '');
+    return `
+      <div class="hole-par-item ${cls}" onclick="cyclePar(${i})">
+        <div class="hole-num">HOLE ${i + 1}</div>
+        <div class="hole-par-value">${par}</div>
+      </div>
+    `;
+  }).join('');
+
+  updateTotalPar();
+}
+
+function cyclePar(idx) {
+  const cycle = [3, 4, 5];
+  const current = cycle.indexOf(holePars[idx]);
+  holePars[idx] = cycle[(current + 1) % 3];
+  renderHoleParGrid();
+}
+
+function setHoleCount(count, btn) {
+  courseHoleCount = count;
+  btn.parentElement.querySelectorAll('.hole-count-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderHoleParGrid();
+}
+
+function updateTotalPar() {
+  const total = holePars.slice(0, courseHoleCount).reduce((a, b) => a + b, 0);
+  document.getElementById('totalParValue').textContent = total;
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+function showToast(message) {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+// ============================================================
+// DRAWER
+// ============================================================
+function openDrawer() {
+  document.getElementById('drawerOverlay').classList.add('show');
+  document.getElementById('drawer').classList.add('open');
+}
+
+function closeDrawer() {
+  document.getElementById('drawerOverlay').classList.remove('show');
+  document.getElementById('drawer').classList.remove('open');
+}
+
+// ============================================================
+// GROUP SWITCHER
+// ============================================================
+function renderGroupDropdown() {
+  const list = document.getElementById('groupDropdownList');
+  list.innerHTML = GROUPS.map(g => `
+    <button class="group-dropdown-item${g.id === currentGroupId ? ' active' : ''}"
+            onclick="event.stopPropagation(); switchGroup(${g.id})">
+      <div class="group-icon" style="background: ${g.color}15; color: ${g.color};">${g.emoji}</div>
+      <div class="group-detail">
+        <div class="group-name">${g.name}</div>
+        <div class="group-meta">#${g.code} · ${g.members} members · ${g.upcoming} upcoming</div>
+      </div>
+      <div class="group-check">✓</div>
+    </button>
+  `).join('');
+}
+
+function toggleGroupDropdown(e) {
+  e.stopPropagation();
+  const switcher = document.getElementById('groupSwitcher');
+  const dropdown = document.getElementById('groupDropdown');
+  const overlay = document.getElementById('dropdownOverlay');
+  const isOpen = dropdown.classList.contains('show');
+
+  if (isOpen) {
+    closeGroupDropdown();
+  } else {
+    dropdown.classList.add('show');
+    switcher.classList.add('open');
+    overlay.classList.add('show');
+    renderGroupDropdown();
+  }
+}
+
+function closeGroupDropdown() {
+  document.getElementById('groupDropdown').classList.remove('show');
+  document.getElementById('groupSwitcher').classList.remove('open');
+  document.getElementById('dropdownOverlay').classList.remove('show');
+}
+
+function switchGroup(groupId) {
+  currentGroupId = groupId;
+  const group = GROUPS.find(g => g.id === groupId);
+  document.getElementById('currentGroupName').textContent = group.name;
+
+  // Update announcement for different groups
+  const announcements = {
+    1: 'Spring Tournament on Apr 20th at Pebble Beach! Sign up before Apr 15. Top 3 get prizes 🏆',
+    2: 'Welcome new members! Check out our monthly handicap rankings in Stats 📊',
+    3: 'Q2 team building — golf outing on May 1st. HR will cover green fees!',
+    4: 'Skins pot is up to $240 this week. Don\'t miss Sunday\'s round! 💵',
+  };
+
+  const announcementEl = document.querySelector('.announcement-text');
+  if (announcementEl) announcementEl.textContent = announcements[groupId] || '';
+
+  closeGroupDropdown();
+  showToast(`Switched to ${group.name}`);
+}
+
+// ============================================================
+// INIT
+// ============================================================
+function init() {
+  renderCalendar();
+  renderListView();
+  renderScorecard();
+  renderHoleParGrid();
+
+  // Show today's tee times
+  selectDay(7);
+}
+
+init();
+</script>
+</body>
+</html>
