@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Tee Time Detail — TeeLab AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="app">
+  <!-- Header -->
+  <div class="detail-header" style="display:flex;align-items:center;justify-content:space-between;padding:var(--space-md) var(--space-lg);border-bottom:1px solid var(--gray-100);background:#fff;position:sticky;top:0;z-index:10;">
+    <button onclick="navigate('group')" style="background:none;border:none;font-size:20px;cursor:pointer;padding:var(--space-xs);color:var(--gray-700);">←</button>
+    <span id="headerTitle" style="font-family:var(--font-display);font-weight:700;font-size:17px;color:var(--gray-900);"></span>
+    <button style="background:none;border:none;font-size:20px;cursor:pointer;padding:var(--space-xs);color:var(--gray-600);">⋯</button>
+  </div>
+
+  <!-- Content -->
+  <div id="detailContent"></div>
+</div>
+
+<script src="shared.js?v=2"></script>
+<script>
+(function() {
+  const id = parseInt(getParam('id'));
+  const tt = TEE_TIMES.find(t => t.id === id);
+  if (!tt) {
+    document.getElementById('detailContent').innerHTML = '<p style="padding:var(--space-xl);text-align:center;color:var(--gray-500);">Tee time not found.</p>';
+    return;
+  }
+
+  const dateObj = new Date(tt.date + 'T00:00:00');
+  const dateStr = dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+
+  document.getElementById('headerTitle').textContent = tt.course;
+  document.title = tt.course + ' — TeeLab AI';
+
+  const container = document.getElementById('detailContent');
+
+  if (tt.status === 'upcoming') renderUpcoming(tt, dateStr, container);
+  else if (tt.status === 'in_progress') renderInProgress(tt, dateStr, container);
+  else if (tt.status === 'completed') renderCompleted(tt, dateStr, container);
+
+  // ============================================================
+  // UPCOMING
+  // ============================================================
+  function renderUpcoming(tt, dateStr, el) {
+    const isPlayer = tt.players.includes(MY_INDEX);
+    const isWaitlisted = tt.waitlist.includes(MY_INDEX);
+    const hasSlotsOpen = tt.players.length < tt.maxPlayers;
+
+    // Players
+    let playersHtml = tt.players.map(pi => {
+      const m = MEMBERS[pi];
+      const role = pi === tt.players[0] ? 'Organizer' : 'Player';
+      return `
+        <div class="player-slot">
+          <div class="ps-avatar" style="background:${m.color}">${m.initials}</div>
+          <div class="ps-info">
+            <div class="ps-name">${m.name}${pi === MY_INDEX ? ' (You)' : ''}</div>
+            <div class="ps-role">${role}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Empty slots
+    const emptyCount = tt.maxPlayers - tt.players.length;
+    for (let i = 0; i < emptyCount; i++) {
+      playersHtml += `
+        <div class="player-slot empty">
+          <div class="ps-avatar empty-avatar">+</div>
+          <div class="ps-info">
+            <div class="ps-name">Open Slot</div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Waitlist
+    let waitlistHtml = '';
+    if (tt.waitlist.length > 0) {
+      const waitlistPlayers = tt.waitlist.map(pi => {
+        const m = MEMBERS[pi];
+        return `
+          <div class="player-slot waitlisted">
+            <div class="ps-avatar" style="background:${m.color}">${m.initials}</div>
+            <div class="ps-info">
+              <div class="ps-name">${m.name}${pi === MY_INDEX ? ' (You)' : ''}</div>
+              <span class="waitlist-label">Waitlisted</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+      waitlistHtml = `
+        <div class="detail-section">
+          <div class="detail-section-title">Waitlist (${tt.waitlist.length})</div>
+          ${waitlistPlayers}
+        </div>
+      `;
+    }
+
+    // Chat
+    const chatHtml = TEE_TIME_CHAT.map(msg => renderChatMsg(msg)).join('');
+
+    // Action button
+    let actionBtn = '';
+    if (isPlayer) {
+      actionBtn = `<button class="btn-danger" onclick="showToast('Withdrawn from tee time')">Withdraw</button>`;
+    } else if (isWaitlisted) {
+      actionBtn = `<button class="btn-secondary" onclick="showToast('Left waitlist')">Leave Waitlist</button>`;
+    } else if (hasSlotsOpen) {
+      actionBtn = `<button class="btn-primary" onclick="showToast('Signed up!')">Sign Up</button>`;
+    } else {
+      actionBtn = `<button class="btn-secondary" onclick="showToast('Joined waitlist')">Join Waitlist</button>`;
+    }
+
+    el.innerHTML = `
+      <div class="detail-hero">
+        <div class="detail-status-row">
+          <span class="tt-status upcoming">Upcoming</span>
+          <span style="color:var(--gray-500);font-size:13px;">${dateStr}</span>
+        </div>
+        <div class="detail-time">${tt.time}</div>
+        <div class="detail-course-name">${tt.course}</div>
+        <div class="detail-meta">
+          <span class="detail-meta-item">18 Holes</span>
+          <span class="detail-meta-item">${tt.price}</span>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">Players (${tt.players.length}/${tt.maxPlayers})</div>
+        ${playersHtml}
+      </div>
+
+      ${waitlistHtml}
+
+      <div class="detail-section">
+        <div class="detail-section-title">Notes</div>
+        <p style="color:var(--gray-600);font-size:14px;line-height:1.5;margin:0;">Carts included. Meet at clubhouse 30 minutes before tee time. Dress code enforced — collared shirts required.</p>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">Chat</div>
+        <div class="chat-messages">
+          ${chatHtml}
+        </div>
+        <div class="chat-input-row">
+          <input type="text" placeholder="Message..." style="flex:1;border:1px solid var(--gray-200);border-radius:var(--radius-full);padding:var(--space-sm) var(--space-md);font-size:14px;font-family:var(--font-body);outline:none;">
+          <button class="chat-send-btn" onclick="showToast('Message sent')">↑</button>
+        </div>
+      </div>
+
+      <div class="action-bar">
+        ${actionBtn}
+      </div>
+    `;
+  }
+
+  // ============================================================
+  // IN PROGRESS
+  // ============================================================
+  function renderInProgress(tt, dateStr, el) {
+    // Hole progress dots
+    const holes = IN_PROGRESS_HOLES[tt.id] || new Array(18).fill(null);
+    const front9 = holes.slice(0, 9).map(h => {
+      const cls = h === 'birdie' ? 'birdie' : (h ? 'scored' : '');
+      return `<span class="tt-hole-dot ${cls}"></span>`;
+    }).join('');
+    const back9 = holes.slice(9, 18).map(h => {
+      const cls = h === 'birdie' ? 'birdie' : (h ? 'scored' : '');
+      return `<span class="tt-hole-dot ${cls}"></span>`;
+    }).join('');
+    const scoredCount = holes.filter(h => h !== null).length;
+
+    // Live scores mock data
+    const liveScores = [
+      { pi: 6, thru: 11, score: -2 },
+      { pi: 5, thru: 11, score: -1 },
+      { pi: 3, thru: 11, score: +3 },
+      { pi: 7, thru: 11, score: +5 },
+    ];
+
+    const leaderboardHtml = liveScores.map(ls => {
+      const m = MEMBERS[ls.pi];
+      const scoreStr = ls.score === 0 ? 'E' : (ls.score > 0 ? '+' + ls.score : '' + ls.score);
+      const scoreClass = ls.score < 0 ? 'under' : (ls.score > 0 ? 'over' : '');
+      return `
+        <div class="live-player-row">
+          <div class="lp-avatar" style="background:${m.color}">${m.initials}</div>
+          <div class="lp-name">${m.name}</div>
+          <div class="lp-thru">Thru ${ls.thru}</div>
+          <div class="lp-score ${scoreClass}">${scoreStr}</div>
+        </div>
+      `;
+    }).join('');
+
+    // Spectator chat mock
+    const spectatorMessages = [
+      { pi: 0, text: 'Alex is putting lights out today!', time: '5m ago' },
+      { pi: 1, text: 'What happened on hole 7?', time: '3m ago' },
+      { pi: 2, text: 'Two birdies on the front nine, love it', time: '1m ago' },
+    ];
+    const spectatorChatHtml = spectatorMessages.map(msg => renderChatMsg(msg)).join('');
+
+    el.innerHTML = `
+      <div class="detail-hero">
+        <div class="detail-status-row">
+          <span class="live-badge"><span class="live-dot"></span> LIVE</span>
+          <span style="color:var(--gray-500);font-size:13px;">${dateStr} &middot; ${tt.time}</span>
+        </div>
+        <div class="detail-course-name" style="font-size:18px;margin-top:var(--space-sm);">${tt.course}</div>
+      </div>
+
+      <div class="detail-section">
+        <div class="tt-hole-progress">
+          ${front9}
+          <span class="hole-gap"></span>
+          ${back9}
+          <span class="tt-hole-label">${scoredCount}/18</span>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">Leaderboard</div>
+        ${leaderboardHtml}
+      </div>
+
+      <div class="detail-section" style="text-align:center;">
+        <button class="btn-primary" onclick="navigate('scorecard', ${tt.id})">Open Scorecard</button>
+      </div>
+
+      <div class="detail-section spectator-chat">
+        <div class="spectator-chat-title">Spectator Chat <span class="spectator-count">&middot; 3 watching</span></div>
+        <div class="chat-messages">
+          ${spectatorChatHtml}
+        </div>
+        <div class="chat-input-row">
+          <input type="text" placeholder="Message..." style="flex:1;border:1px solid var(--gray-200);border-radius:var(--radius-full);padding:var(--space-sm) var(--space-md);font-size:14px;font-family:var(--font-body);outline:none;">
+          <button class="chat-send-btn" onclick="showToast('Message sent')">↑</button>
+        </div>
+      </div>
+    `;
+  }
+
+  // ============================================================
+  // COMPLETED
+  // ============================================================
+  function renderCompleted(tt, dateStr, el) {
+    const scores = COMPLETED_SCORES[tt.id] || {};
+
+    // Build sorted results
+    const results = tt.players.map(pi => {
+      const m = MEMBERS[pi];
+      const scoreStr = scores[pi] || 'E';
+      const scoreVal = scoreStr === 'E' ? 0 : parseInt(scoreStr);
+      // Count birdies from PLAYER_SCORES if available
+      let birdies = 0;
+      if (PLAYER_SCORES[pi]) {
+        PLAYER_SCORES[pi].forEach((s, i) => {
+          if (s < COURSE_PAR[i]) birdies++;
+        });
+      }
+      return { pi, m, scoreStr, scoreVal, birdies };
+    }).sort((a, b) => a.scoreVal - b.scoreVal);
+
+    const resultsHtml = results.map((r, idx) => {
+      const rank = idx + 1;
+      const rankClass = rank === 1 ? 'gold' : '';
+      const scoreClass = r.scoreVal < 0 ? 'under' : (r.scoreVal > 0 ? 'over' : '');
+      return `
+        <div class="result-player-row">
+          <div class="rp-rank ${rankClass}">#${rank}</div>
+          <div class="rp-avatar" style="background:${r.m.color}">${r.m.initials}</div>
+          <div class="rp-name">${r.m.name}</div>
+          <div class="rp-detail">${r.birdies} birdie${r.birdies !== 1 ? 's' : ''}</div>
+          <div class="rp-score ${scoreClass}">${r.scoreStr}</div>
+        </div>
+      `;
+    }).join('');
+
+    // General comments
+    const generalCommentsHtml = ROUND_COMMENTS.map(msg => renderChatMsg(msg)).join('');
+
+    // Per-hole comments
+    const holeKeys = Object.keys(HOLE_COMMENTS).map(Number).sort((a, b) => a - b);
+    let holeCommentsHtml = '';
+    holeKeys.forEach(hole => {
+      const comments = HOLE_COMMENTS[hole];
+      const par = COURSE_PAR[hole - 1] || COURSE_PAR[hole];
+      holeCommentsHtml += `
+        <div class="comment-divider"></div>
+        <div class="comment-thread">
+          <div class="comment-thread-header">
+            <span class="comment-thread-label">Hole ${hole + 1}</span>
+            <span class="comment-thread-par">Par ${par}</span>
+            <span class="comment-thread-count">${comments.length} comment${comments.length !== 1 ? 's' : ''}</span>
+          </div>
+          ${comments.map(msg => renderChatMsg(msg)).join('')}
+        </div>
+      `;
+    });
+
+    // Post-round chat mock
+    const postChatMessages = [
+      { pi: 1, text: 'Great round today! The weather was perfect', time: '30m ago' },
+      { pi: 0, text: 'David was absolutely clutch on the back nine', time: '25m ago' },
+      { pi: 2, text: 'That eagle on 5 was the highlight of my year', time: '20m ago' },
+    ];
+
+    el.innerHTML = `
+      <div class="detail-hero">
+        <div class="detail-status-row">
+          <span class="tt-status completed">Completed</span>
+          <span style="color:var(--gray-500);font-size:13px;">${dateStr} &middot; ${tt.time}</span>
+        </div>
+        <div class="detail-course-name" style="font-size:18px;margin-top:var(--space-sm);">${tt.course}</div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">Final Results</div>
+        ${resultsHtml}
+      </div>
+
+      <div class="detail-section" style="text-align:center;">
+        <button class="btn-primary" onclick="navigate('scorecard', ${tt.id})">View Full Scorecard</button>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">Comments</div>
+
+        <div class="comment-thread">
+          <div class="comment-thread-header">
+            <span class="comment-thread-label">General</span>
+            <span class="comment-thread-count">${ROUND_COMMENTS.length} comment${ROUND_COMMENTS.length !== 1 ? 's' : ''}</span>
+          </div>
+          ${generalCommentsHtml}
+        </div>
+
+        ${holeCommentsHtml}
+
+        <div class="comment-divider"></div>
+        <div class="chat-input-row" style="margin-top:var(--space-md);">
+          <input type="text" placeholder="Add a comment..." style="flex:1;border:1px solid var(--gray-200);border-radius:var(--radius-full);padding:var(--space-sm) var(--space-md);font-size:14px;font-family:var(--font-body);outline:none;">
+          <button class="chat-send-btn" onclick="showToast('Comment posted')">↑</button>
+        </div>
+      </div>
+    `;
+  }
+})();
+</script>
+</body>
+</html>

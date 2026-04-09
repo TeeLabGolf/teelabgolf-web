@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>New Tee Time — TeeLab AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<script src="shared.js?v=2"></script>
+</head>
+<body>
+<div id="app">
+
+  <!-- Header -->
+  <div class="header">
+    <button class="header-back" onclick="location.href='index.html'">←</button>
+    <div class="header-title">New Tee Time</div>
+    <div class="header-back invisible"></div>
+  </div>
+
+  <!-- Form -->
+  <div class="form-page">
+
+    <!-- Course -->
+    <div class="form-group">
+      <label class="form-label">Course</label>
+      <div class="course-select-card selected" onclick="this.classList.toggle('selected')">
+        <div class="course-icon">⛳</div>
+        <div class="course-info">
+          <div class="course-name">Torrey Pines South</div>
+          <div class="course-address">La Jolla, CA</div>
+        </div>
+        <div class="check">✓</div>
+      </div>
+      <a href="create-course.html" style="display:inline-block; margin-top:var(--space-md); font-size:13px; font-weight:600; color:var(--green-600); text-decoration:none; cursor:pointer;">+ Add new course</a>
+    </div>
+
+    <!-- Date & Time -->
+    <div class="form-group">
+      <label class="form-label">Date & Time</label>
+      <input type="datetime-local" class="form-input" value="2026-04-11T07:30">
+    </div>
+
+    <!-- Max Players -->
+    <div class="form-group">
+      <label class="form-label">Max Players</label>
+      <div class="stepper">
+        <button class="stepper-btn" onclick="adjustStepper(-1)">−</button>
+        <div class="stepper-value" id="stepperValue">4</div>
+        <button class="stepper-btn" onclick="adjustStepper(1)">+</button>
+      </div>
+    </div>
+
+    <!-- Price -->
+    <div class="form-group">
+      <label class="form-label">Price</label>
+      <div class="form-input-icon">
+        <span class="icon">$</span>
+        <input type="number" class="form-input" value="180" placeholder="0">
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <textarea class="form-input" rows="3" placeholder="Any details for the group..." style="resize:none; font-family:var(--font-body);"></textarea>
+    </div>
+
+    <!-- Submit -->
+    <button class="btn-primary" onclick="showToast('Tee time created!'); setTimeout(() => navigate('group'), 400);">Create Tee Time</button>
+
+  </div>
+
+</div>
+
+<script>
+function adjustStepper(delta) {
+  const el = document.getElementById('stepperValue');
+  let val = parseInt(el.textContent) + delta;
+  if (val < 1) val = 1;
+  if (val > 8) val = 8;
+  el.textContent = val;
+}
+</script>
+</body>
+</html>

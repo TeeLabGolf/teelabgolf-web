@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Comments — TeeLab AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<script src="shared.js?v=2"></script>
+</head>
+<body>
+<div id="app">
+
+  <!-- Header -->
+  <div class="header">
+    <button class="header-back" onclick="location.href='scorecard.html'">←</button>
+    <div class="header-title">Comments</div>
+    <div class="header-back invisible"></div>
+  </div>
+
+  <!-- Comments Content -->
+  <div id="commentsContent"></div>
+
+  <!-- Sticky Comment Input Bar -->
+  <div class="comment-input-bar">
+    <button class="comment-target-btn" id="commentTargetBtn" onclick="toggleCommentTarget()">General ▾</button>
+    <div class="comment-target-dropdown" id="commentTargetDropdown">
+      <button class="comment-target-option active" onclick="selectCommentTarget('round', 'General')">General</button>
+      <div class="comment-target-divider"></div>
+      <div class="comment-target-holes" id="commentTargetHoles"></div>
+    </div>
+    <input type="text" id="commentInput" placeholder="Add a comment..." onkeydown="if(event.key==='Enter') sendPageComment()">
+    <button class="chat-send-btn" onclick="sendPageComment()">↑</button>
+  </div>
+
+</div>
+
+<script>
+let commentTarget = 'round';
+
+function renderCommentsPage(scrollToHole) {
+  const content = document.getElementById('commentsContent');
+  let html = '';
+
+  // General thread (round comments)
+  html += '<div class="comment-thread" id="thread-general">';
+  html += '<div class="comment-thread-header">';
+  html += '<div class="comment-thread-label">General</div>';
+  html += '<div class="comment-thread-count">' + ROUND_COMMENTS.length + ' comment' + (ROUND_COMMENTS.length !== 1 ? 's' : '') + '</div>';
+  html += '</div>';
+  html += renderCommentMessages(ROUND_COMMENTS);
+  html += '</div>';
+
+  // Hole threads — only holes with comments
+  const holeKeys = Object.keys(HOLE_COMMENTS).map(Number).sort((a, b) => a - b);
+  holeKeys.forEach(holeIdx => {
+    const msgs = HOLE_COMMENTS[holeIdx];
+    if (!msgs || msgs.length === 0) return;
+
+    const holeNum = holeIdx + 1;
+    const par = COURSE_PAR[holeIdx];
+    html += '<div class="comment-divider"></div>';
+    html += '<div class="comment-thread" id="thread-hole-' + holeIdx + '">';
+    html += '<div class="comment-thread-header">';
+    html += '<div class="comment-thread-label">Hole ' + holeNum + '</div>';
+    html += '<div class="comment-thread-par">Par ' + par + '</div>';
+    html += '<div class="comment-thread-count">' + msgs.length + ' comment' + (msgs.length !== 1 ? 's' : '') + '</div>';
+    html += '</div>';
+    html += renderCommentMessages(msgs);
+    html += '</div>';
+  });
+
+  if (holeKeys.length === 0 && ROUND_COMMENTS.length === 0) {
+    html += '<div class="no-comments">No comments yet. Be the first!</div>';
+  }
+
+  content.innerHTML = html;
+
+  // Populate hole options in dropdown
+  const holesContainer = document.getElementById('commentTargetHoles');
+  let holesHtml = '';
+  for (let i = 0; i < 18; i++) {
+    holesHtml += '<button class="comment-target-option" onclick="selectCommentTarget(' + i + ', \'Hole ' + (i + 1) + '\')">Hole ' + (i + 1) + '</button>';
+  }
+  holesContainer.innerHTML = holesHtml;
+
+  // Scroll to specific hole if requested via ?id param
+  const paramId = scrollToHole !== undefined ? scrollToHole : getParam('id');
+  if (paramId !== null && paramId !== undefined) {
+    const el = document.getElementById('thread-hole-' + paramId);
+    if (el) {
+      setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+    }
+  }
+}
+
+function renderCommentMessages(msgs) {
+  if (!msgs || msgs.length === 0) {
+    return '<div class="no-comments">No comments yet</div>';
+  }
+  return msgs.map(msg => renderChatMsg(msg)).join('');
+}
+
+function toggleCommentTarget() {
+  const dropdown = document.getElementById('commentTargetDropdown');
+  dropdown.classList.toggle('show');
+}
+
+function selectCommentTarget(target, label) {
+  commentTarget = target;
+  document.getElementById('commentTargetBtn').textContent = label + ' ▾';
+  document.getElementById('commentTargetDropdown').classList.remove('show');
+
+  // Update active state
+  const options = document.querySelectorAll('.comment-target-option');
+  options.forEach(opt => opt.classList.remove('active'));
+  // Find and activate the selected one
+  if (target === 'round') {
+    options[0].classList.add('active');
+  }
+
+  document.getElementById('commentInput').focus();
+}
+
+function sendPageComment() {
+  const input = document.getElementById('commentInput');
+  const text = input.value.trim();
+  if (!text) return;
+
+  const newMsg = { pi: MY_INDEX, text: text, time: 'just now' };
+
+  if (commentTarget === 'round') {
+    ROUND_COMMENTS.push(newMsg);
+  } else {
+    const holeIdx = commentTarget;
+    if (!HOLE_COMMENTS[holeIdx]) {
+      HOLE_COMMENTS[holeIdx] = [];
+    }
+    HOLE_COMMENTS[holeIdx].push(newMsg);
+  }
+
+  input.value = '';
+  renderCommentsPage();
+}
+
+// Close dropdown on outside click
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.comment-target-btn') && !e.target.closest('.comment-target-dropdown')) {
+    document.getElementById('commentTargetDropdown').classList.remove('show');
+  }
+});
+
+// Init
+renderCommentsPage();
+</script>
+</body>
+</html>

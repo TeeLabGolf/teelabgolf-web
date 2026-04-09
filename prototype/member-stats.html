@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Member Stats — TeeLab AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="app">
+  <div class="header">
+    <button class="header-back" onclick="navigate('group')">‹</button>
+    <div class="header-title" id="pageTitle">Stats</div>
+    <button class="header-action invisible">·</button>
+  </div>
+
+  <div style="padding: 0 var(--space-lg);" id="statsContent"></div>
+</div>
+
+<script src="shared.js?v=2"></script>
+<script>
+// Per-member mock stats
+const MEMBER_STATS = {
+  0: { avg: '+2.4', handicap: '12.8', rounds: 10, best: 71, trend: [+3,+1,+5,+2,+4,+1,+3,0,+2,+1], recentRounds: [
+    { day:'5',month:'Apr',course:'Torrey Pines South',score:'+1' },
+    { day:'29',month:'Mar',course:'Riviera CC',score:'+3' },
+    { day:'22',month:'Mar',course:'Pebble Beach',score:'0' },
+    { day:'15',month:'Mar',course:'Torrey Pines South',score:'+2' },
+    { day:'8',month:'Mar',course:'Torrey Pines North',score:'+5' },
+  ]},
+  1: { avg: '+2.8', handicap: '14.2', rounds: 9, best: 73, trend: [+4,+3,+2,+5,+3,+2,+1,+3,+2], recentRounds: [
+    { day:'5',month:'Apr',course:'Torrey Pines South',score:'+3' },
+    { day:'22',month:'Mar',course:'Pebble Beach',score:'+2' },
+    { day:'15',month:'Mar',course:'Torrey Pines South',score:'+1' },
+  ]},
+  2: { avg: '+2.0', handicap: '10.5', rounds: 8, best: 72, trend: [+2,+1,+3,+1,+4,+2,+1,+2], recentRounds: [
+    { day:'5',month:'Apr',course:'Torrey Pines South',score:'+2' },
+    { day:'22',month:'Mar',course:'Pebble Beach',score:'+1' },
+    { day:'15',month:'Mar',course:'Torrey Pines South',score:'+4' },
+  ]},
+  3: { avg: '+4.1', handicap: '18.3', rounds: 10, best: 75, trend: [+5,+6,+4,+3,+5,+4,+3,+5,+4,+2], recentRounds: [
+    { day:'5',month:'Apr',course:'Torrey Pines South',score:'+5' },
+    { day:'29',month:'Mar',course:'Riviera CC',score:'+4' },
+    { day:'15',month:'Mar',course:'Torrey Pines South',score:'+3' },
+  ]},
+  4: { avg: '+5.3', handicap: '22.1', rounds: 6, best: 77, trend: [+7,+5,+6,+4,+5,+5], recentRounds: [
+    { day:'22',month:'Mar',course:'Pebble Beach',score:'+6' },
+  ]},
+  5: { avg: '+3.5', handicap: '16.0', rounds: 7, best: 74, trend: [+4,+3,+5,+3,+2,+4,+3], recentRounds: [
+    { day:'29',month:'Mar',course:'Riviera CC',score:'+2' },
+    { day:'8',month:'Mar',course:'Torrey Pines North',score:'+3' },
+  ]},
+  6: { avg: '+6.0', handicap: '25.4', rounds: 5, best: 78, trend: [+8,+6,+5,+7,+4], recentRounds: [
+    { day:'29',month:'Mar',course:'Riviera CC',score:'+7' },
+    { day:'22',month:'Feb',course:'Pebble Beach',score:'+3' },
+  ]},
+  7: { avg: '+8.2', handicap: '30.0', rounds: 4, best: 82, trend: [+10,+8,+9,+6], recentRounds: [
+    { day:'8',month:'Mar',course:'Torrey Pines North',score:'+8' },
+  ]},
+};
+
+function init() {
+  const pi = parseInt(getParam('id')) || 0;
+  const m = MEMBERS[pi];
+  const s = MEMBER_STATS[pi] || MEMBER_STATS[0];
+  const isMe = pi === MY_INDEX;
+
+  document.getElementById('pageTitle').textContent = m.name;
+
+  const container = document.getElementById('statsContent');
+  container.innerHTML = `
+    <!-- Member header -->
+    <div style="display:flex; align-items:center; gap:var(--space-md); margin-top:var(--space-md); margin-bottom:var(--space-xl);">
+      <div style="background:${m.color}; width:48px; height:48px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-weight:700; font-size:17px; color:#fff;">${m.initials}</div>
+      <div style="flex:1;">
+        <div style="font-family:var(--font-display); font-size:18px; font-weight:700; color:var(--gray-800);">${m.name}</div>
+        <div style="font-size:13px; color:var(--gray-400);">${isMe ? 'You' : 'Member'} · ${s.rounds} rounds in this group</div>
+      </div>
+    </div>
+
+    <!-- Stat Cards -->
+    <div class="stats-cards">
+      <div class="stat-card"><div class="stat-value">${s.avg}</div><div class="stat-label">Avg Score</div></div>
+      <div class="stat-card"><div class="stat-value">${s.handicap}</div><div class="stat-label">Handicap</div></div>
+      <div class="stat-card"><div class="stat-value">${s.rounds}</div><div class="stat-label">Rounds</div></div>
+      <div class="stat-card"><div class="stat-value">${s.best}</div><div class="stat-label">Best</div></div>
+    </div>
+
+    <!-- Score Trend -->
+    <div class="section-header" style="margin-top: var(--space-xl);">
+      <div class="section-title">Score Trend</div>
+    </div>
+    <div class="trend-chart" id="trendChart"></div>
+
+    <!-- Recent Rounds -->
+    <div class="section-header" style="margin-top: var(--space-xl);">
+      <div class="section-title">Recent Rounds</div>
+    </div>
+    <div id="recentRounds" style="display:flex; flex-direction:column;"></div>
+  `;
+
+  renderTrendChart(s.trend);
+  renderRecentRounds(s.recentRounds);
+}
+
+function renderTrendChart(scores) {
+  const chart = document.getElementById('trendChart');
+  if (!scores || scores.length < 2) { chart.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--gray-400);font-size:13px;">Not enough data</div>'; return; }
+  const maxVal = Math.max(...scores) + 1;
+  const minVal = Math.min(0, Math.min(...scores)) - 1;
+  const range = maxVal - minVal;
+  const w = 100, h = 100, padX = 5, padY = 10;
+  const usableW = w - padX * 2, usableH = h - padY * 2;
+
+  const points = scores.map((s, i) => ({
+    x: padX + (i / (scores.length - 1)) * usableW,
+    y: padY + ((maxVal - s) / range) * usableH,
+    s
+  }));
+
+  const parY = padY + ((maxVal - 0) / range) * usableH;
+  const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+  const areaD = pathD + ` L ${points[points.length - 1].x} ${padY + usableH} L ${points[0].x} ${padY + usableH} Z`;
+
+  chart.innerHTML = `
+    <svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="var(--green-400)" stop-opacity="0.25"/>
+          <stop offset="100%" stop-color="var(--green-400)" stop-opacity="0.02"/>
+        </linearGradient>
+      </defs>
+      <line x1="${padX}" y1="${parY}" x2="${w - padX}" y2="${parY}" stroke="var(--gray-200)" stroke-width="0.5" stroke-dasharray="2,2"/>
+      <text x="${w - padX}" y="${parY - 2}" fill="var(--gray-400)" font-size="3.5" text-anchor="end" font-family="var(--font-display)">PAR</text>
+      <path d="${areaD}" fill="url(#areaGrad)"/>
+      <path d="${pathD}" fill="none" stroke="var(--green-600)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+      ${points.map(p => `
+        <circle cx="${p.x}" cy="${p.y}" r="1.8" fill="#fff" stroke="var(--green-600)" stroke-width="1"/>
+        <text x="${p.x}" y="${p.y - 4}" fill="var(--gray-600)" font-size="3.2" text-anchor="middle" font-family="var(--font-display)" font-weight="700">${p.s === 0 ? '0' : (p.s > 0 ? '+' + p.s : p.s)}</text>
+      `).join('')}
+    </svg>
+  `;
+}
+
+function renderRecentRounds(rounds) {
+  const container = document.getElementById('recentRounds');
+  if (!rounds || rounds.length === 0) { container.innerHTML = '<div style="text-align:center;padding:24px 0;color:var(--gray-400);font-size:13px;">No rounds yet</div>'; return; }
+  container.innerHTML = rounds.map(r => {
+    const cls = r.score === '0' ? 'even' : (r.score.startsWith('+') ? 'over' : 'under');
+    return `
+      <div class="recent-round">
+        <div class="rr-date"><div class="rr-day">${r.day}</div><div class="rr-month">${r.month}</div></div>
+        <div class="rr-info"><div class="rr-course">${r.course}</div><div class="rr-detail">18 holes · Stroke Play</div></div>
+        <div class="rr-score ${cls}">${r.score}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+init();
+</script>
+</body>
+</html>

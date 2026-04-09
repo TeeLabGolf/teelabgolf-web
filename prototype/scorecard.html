@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Scorecard — TeeLab AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<script src="shared.js?v=2"></script>
+
+<div id="app">
+
+  <!-- Score Input Modal -->
+  <div class="modal-overlay" id="scoreModal">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <button class="modal-nav-btn" id="modalPrev" onclick="navigateHole(-1)">&#8592;</button>
+        <div class="modal-header-center">
+          <div class="modal-title" id="modalTitle">Hole 1</div>
+          <div class="modal-subtitle" id="modalSubtitle">Par 4</div>
+        </div>
+        <button class="modal-nav-btn" id="modalNext" onclick="navigateHole(1)">&#8594;</button>
+      </div>
+      <div class="player-score-rows" id="playerScoreRows"></div>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closeScoreModal()">Cancel</button>
+        <button class="btn-primary" onclick="saveHoleScores()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <div class="header">
+    <button class="header-back" onclick="navigate('tee-detail')">&#8592;</button>
+    <div class="header-title">Scorecard</div>
+    <button class="header-action">&#x1F4CA;</button>
+  </div>
+
+  <!-- Scorecard Header -->
+  <div class="scorecard-header">
+    <div class="scorecard-info">
+      <div class="sc-course">Torrey Pines South</div>
+      <div class="sc-meta">Apr 5, 2026 &middot; Blue Tee &middot; Stroke Play</div>
+    </div>
+    <div class="live-badge">
+      <span class="live-dot"></span>
+      LIVE
+    </div>
+  </div>
+
+  <!-- Front 9 -->
+  <div class="section-label">Front 9</div>
+  <div class="scorecard-wrapper">
+    <table class="scorecard-table" id="front9Table"></table>
+  </div>
+
+  <!-- Back 9 -->
+  <div class="section-label">Back 9</div>
+  <div class="scorecard-wrapper">
+    <table class="scorecard-table" id="back9Table"></table>
+  </div>
+
+  <!-- Leaderboard -->
+  <div class="section-label">Leaderboard</div>
+  <div class="score-summaries" id="scoreSummaries"></div>
+
+  <!-- Comments -->
+  <div style="padding: var(--space-lg);">
+    <button class="btn-secondary" id="commentsBtn" onclick="navigate('comments')">&#x1F4AC; Comments &middot; 7</button>
+  </div>
+
+</div>
+
+<script>
+// ============================================================
+// MODAL STATE
+// ============================================================
+let modalHoleIdx = 0;
+let modalScores = {};
+
+// ============================================================
+// RENDER SCORECARD
+// ============================================================
+function renderScorecard() {
+  renderScoreTable('front9Table', 0, 9);
+  renderScoreTable('back9Table', 9, 18);
+  renderSummaries();
+}
+
+function renderScoreTable(tableId, start, end) {
+  const table = document.getElementById(tableId);
+  const players = [0, 1, 2, 3];
+
+  // Hole header row
+  let holeHeaderHtml = '<tr><th class="hole-header">Hole</th>';
+  for (let i = start; i < end; i++) {
+    const holeNum = i + 1;
+    const hasComments = HOLE_COMMENTS[i] && HOLE_COMMENTS[i].length > 0;
+    const commentDot = hasComments ? '<span class="hole-comment-dot"></span>' : '';
+    holeHeaderHtml += `<th class="hole-header" style="cursor:pointer;" onclick="openHoleModal(${i})">${holeNum}${commentDot}</th>`;
+  }
+  holeHeaderHtml += '<th class="hole-header">TOT</th></tr>';
+
+  // Par row
+  let parRowHtml = '<tr class="par-row"><td class="label-cell">Par</td>';
+  let parTotal = 0;
+  for (let i = start; i < end; i++) {
+    parRowHtml += `<td>${COURSE_PAR[i]}</td>`;
+    parTotal += COURSE_PAR[i];
+  }
+  parRowHtml += `<td>${parTotal}</td></tr>`;
+
+  // Player rows
+  let playerRowsHtml = '';
+  players.forEach(pi => {
+    const m = MEMBERS[pi];
+    const scores = PLAYER_SCORES[pi];
+    let rowHtml = `<tr class="player-row"><td class="player-name-cell">${m.name}</td>`;
+    let total = 0;
+
+    for (let i = start; i < end; i++) {
+      const score = scores[i];
+      const par = COURSE_PAR[i];
+      const diff = score - par;
+      total += score;
+
+      // Diff display text
+      let diffText;
+      if (diff === 0) diffText = 'E';
+      else if (diff > 0) diffText = '+' + diff;
+      else diffText = String(diff);
+
+      // Color class
+      let cls = '';
+      if (diff <= -2) cls = 'eagle';
+      else if (diff === -1) cls = 'birdie';
+      else if (diff === 1) cls = 'bogey';
+      else if (diff >= 2) cls = 'double-bogey';
+
+      rowHtml += `<td class="score-cell ${cls}" onclick="openScoreModal(${pi}, ${i})">${diffText}</td>`;
+    }
+
+    // Total for the 9 holes
+    const parSection = COURSE_PAR.slice(start, end).reduce((a, b) => a + b, 0);
+    const totalDiff = total - parSection;
+    let totalText;
+    if (totalDiff === 0) totalText = 'E';
+    else if (totalDiff > 0) totalText = '+' + totalDiff;
+    else totalText = String(totalDiff);
+
+    rowHtml += `<td class="total-cell">${total} (${totalText})</td></tr>`;
+    playerRowsHtml += rowHtml;
+  });
+
+  table.innerHTML = `<thead>${holeHeaderHtml}</thead><tbody>${parRowHtml}${playerRowsHtml}</tbody>`;
+}
+
+// ============================================================
+// LEADERBOARD SUMMARIES
+// ============================================================
+function renderSummaries() {
+  const container = document.getElementById('scoreSummaries');
+  const players = [0, 1, 2, 3];
+  const totalPar = COURSE_PAR.reduce((a, b) => a + b, 0);
+
+  const standings = players.map(pi => {
+    const scores = PLAYER_SCORES[pi];
+    const totalStrokes = scores.reduce((a, b) => a + b, 0);
+    const diff = totalStrokes - totalPar;
+    const birdies = scores.filter((s, i) => s - COURSE_PAR[i] === -1).length;
+    return { pi, totalStrokes, diff, birdies };
+  });
+
+  standings.sort((a, b) => a.totalStrokes - b.totalStrokes);
+
+  container.innerHTML = standings.map((s, idx) => {
+    const m = MEMBERS[s.pi];
+    const rankClass = idx === 0 ? 'first' : '';
+
+    let diffText;
+    if (s.diff === 0) diffText = 'E';
+    else if (s.diff > 0) diffText = '+' + s.diff;
+    else diffText = String(s.diff);
+
+    let diffClass = 'even';
+    if (s.diff < 0) diffClass = 'under';
+    else if (s.diff > 0) diffClass = 'over';
+
+    return `
+      <div class="score-summary-card">
+        <div class="rank ${rankClass}">${idx + 1}</div>
+        <div class="avatar" style="background:${m.color}">${m.initials}</div>
+        <div class="summary-info">
+          <div class="summary-name">${m.name}</div>
+          <div class="summary-detail">${s.birdies} birdie${s.birdies !== 1 ? 's' : ''}</div>
+        </div>
+        <div class="summary-score">
+          <div class="total-strokes ${diffClass}">${diffText}</div>
+          <div class="summary-detail">${s.totalStrokes} strokes</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ============================================================
+// SCORE MODAL
+// ============================================================
+function openScoreModal(pi, holeIdx) {
+  modalHoleIdx = holeIdx;
+  modalScores = {};
+  [0, 1, 2, 3].forEach(p => {
+    modalScores[p] = PLAYER_SCORES[p][holeIdx];
+  });
+  document.getElementById('scoreModal').classList.add('show');
+  renderPlayerScoreRows();
+  updateModalHeader();
+}
+
+function openHoleModal(holeIdx) {
+  openScoreModal(0, holeIdx);
+}
+
+function renderPlayerScoreRows() {
+  const container = document.getElementById('playerScoreRows');
+  const par = COURSE_PAR[modalHoleIdx];
+
+  container.innerHTML = [0, 1, 2, 3].map(pi => {
+    const m = MEMBERS[pi];
+    const score = modalScores[pi];
+    const diff = score - par;
+
+    let scoreClass = 'par';
+    if (diff <= -2) scoreClass = 'eagle';
+    else if (diff === -1) scoreClass = 'birdie';
+    else if (diff === 1) scoreClass = 'bogey';
+    else if (diff >= 2) scoreClass = 'double-bogey';
+
+    let diffText, diffClass;
+    if (diff === 0) { diffText = 'E'; diffClass = 'even'; }
+    else if (diff > 0) { diffText = '+' + diff; diffClass = 'over'; }
+    else { diffText = String(diff); diffClass = 'under'; }
+
+    return `
+      <div class="player-score-row${pi === MY_INDEX ? ' active-input' : ''}">
+        <div class="ps-avatar" style="background:${m.color}">${m.initials}</div>
+        <div class="ps-name">${m.name}</div>
+        <div class="ps-controls">
+          <button class="ps-adj-btn" onclick="adjustPlayerScore(${pi}, -1)">&minus;</button>
+          <div>
+            <div class="ps-score ${scoreClass}">${score}</div>
+            <div class="ps-diff ${diffClass}">${diffText}</div>
+          </div>
+          <button class="ps-adj-btn" onclick="adjustPlayerScore(${pi}, 1)">+</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function adjustPlayerScore(pi, delta) {
+  const newScore = modalScores[pi] + delta;
+  if (newScore < 1) return;
+  modalScores[pi] = newScore;
+  renderPlayerScoreRows();
+}
+
+function navigateHole(delta) {
+  // Auto-save current scores before navigating
+  saveHoleScoresQuiet();
+
+  const newIdx = modalHoleIdx + delta;
+  if (newIdx < 0 || newIdx > 17) return;
+  modalHoleIdx = newIdx;
+
+  // Load scores for new hole
+  [0, 1, 2, 3].forEach(p => {
+    modalScores[p] = PLAYER_SCORES[p][modalHoleIdx];
+  });
+
+  updateModalHeader();
+  renderPlayerScoreRows();
+}
+
+function updateModalHeader() {
+  const par = COURSE_PAR[modalHoleIdx];
+  document.getElementById('modalTitle').textContent = 'Hole ' + (modalHoleIdx + 1);
+  document.getElementById('modalSubtitle').textContent = 'Par ' + par;
+  document.getElementById('modalPrev').disabled = modalHoleIdx === 0;
+  document.getElementById('modalNext').disabled = modalHoleIdx === 17;
+}
+
+function saveHoleScoresQuiet() {
+  [0, 1, 2, 3].forEach(pi => {
+    PLAYER_SCORES[pi][modalHoleIdx] = modalScores[pi];
+  });
+}
+
+function saveHoleScores() {
+  saveHoleScoresQuiet();
+  closeScoreModal();
+  renderScorecard();
+  showToast('Scores saved for Hole ' + (modalHoleIdx + 1));
+}
+
+function closeScoreModal() {
+  document.getElementById('scoreModal').classList.remove('show');
+}
+
+// ============================================================
+// COMMENT COUNTS
+// ============================================================
+function updateCommentCounts() {
+  let total = ROUND_COMMENTS.length;
+  Object.values(HOLE_COMMENTS).forEach(arr => { total += arr.length; });
+  const btn = document.getElementById('commentsBtn');
+  if (btn) btn.textContent = '\uD83D\uDCAC Comments \u00B7 ' + total;
+}
+
+// ============================================================
+// INIT
+// ============================================================
+function init() {
+  renderScorecard();
+  updateCommentCounts();
+}
+
+init();
+</script>
+
+</body>
+</html>
